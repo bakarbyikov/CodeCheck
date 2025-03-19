@@ -1,16 +1,16 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+from model import Model
 
+app = FastAPI()
+model = Model()
 
 @app.get("/generate_problem")
 def generate_problem(text: str):
-    print(f"{text = }")
+    solution = model.create_solution(text)
+    tests = model.create_tests(text, solution)
     return {
-        "solution": 'print("Hello World!")',
-        "tests": [
-            ('1,2,3', '1'),
-            ('2,3,4', '2')
-        ]
+        "solution": solution,
+        "tests": tests
     }
 

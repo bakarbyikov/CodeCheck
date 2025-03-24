@@ -1,13 +1,16 @@
-import subprocess
+import sys
 from csv import DictReader
+from io import StringIO
 from itertools import count
 from pathlib import Path
-from tempfile import NamedTemporaryFile
 from typing import Self
 
 from loguru import logger
 from pydantic.dataclasses import dataclass
 
+
+class SolutionError(Exception):
+    pass
 
 @dataclass
 class Test:
@@ -65,29 +68,36 @@ class Problem:
 
 
 def run(solution: str, input: str) -> str:
-    programm = NamedTemporaryFile("w")
-    with programm as file:
-        file.write(solution)
+    sys.stdin = StringIO(input)
+    sys.stdout = out = StringIO()
 
-    return subprocess.run(["python", programm.name],
-                          input=input,
-                          text=True,
-                          capture_output=True).stdout
+    try:
+        exec(solution, {}, {})
+    except Exception as e:
+        raise SolutionError(e)
+    
+    return out.getvalue().strip()
+
 
 
 def test(solution: str, problem: Problem):
     passed = 0
     for i, test in enumerate(problem.tests):
         expected = test.expected
-        got = run(solution, test.input)
-        if got == test.expected:
-            logger.success(f"Test #{i} passed {expected=} {got=}")
-            passed += 1
-        else:
+        try:
+            got = run(solution, test.input)
+        except SolutionError as exception:
+            logger.error(f"Test #{i} failed with {exception}")
+            continue
+        if got != test.expected:
             logger.error(f"Test #{i} failed {expected=} {got=}")
+            continue
+        logger.success(f"Test #{i} passed {expected=} {got=}")
+        passed += 1
     logger.info(f"Passed {passed}/{len(problem.tests)} tests")
-
 
 if __name__ == "__main__":
     problems = Problem.from_folder("DataSet/Tests")
     melons = problems["melons"]
+    solution = "1/0"
+    test(solution, melons)

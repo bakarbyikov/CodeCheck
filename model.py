@@ -50,12 +50,14 @@ class Model:
 
 
 if __name__ == "__main__":
-    from tester import Problem, test
     from contexttimer import Timer
     from loguru import logger
+
+    from tester import Problem, test
     
     problems = Problem.from_folder("DataSet/Tests")
-    melons = problems["melons"]
+    print(problems.keys())
+    melons = problems["melons_en"]
     model = Model()
     with Timer() as timer:
         solution = model.create_solution(melons.text)

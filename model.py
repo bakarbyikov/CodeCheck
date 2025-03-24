@@ -1,6 +1,10 @@
 import re
 
+from contexttimer import Timer
 from llama_cpp import Llama
+from loguru import logger
+
+from tester import Problem
 
 
 class Model:
@@ -9,8 +13,8 @@ class Model:
 
     def __init__(self):
         self.llm = Llama.from_pretrained(
-            repo_id="Qwen/Qwen2.5-Coder-0.5B-Instruct-GGUF",
-            filename="qwen2.5-coder-0.5b-instruct-fp16.gguf",
+            repo_id="Qwen/Qwen2.5-Coder-7B-Instruct-GGUF",
+            filename="qwen2.5-coder-7b-instruct-q8_0.gguf",
             verbose=False,
             n_gpu_layers=-1,
             n_threads=16,
@@ -48,18 +52,16 @@ class Model:
         print(result)
         return self.extract_json(result) or self.extract_code(result)
 
+    def test(self, problems: list[Problem]):
+        for problem in problems:
+            logger.info(f"Problem {problem.name}")
+            with Timer() as timer:
+                solution = self.create_solution(problem.text)
+            logger.info(f"Solved in {timer.elapsed:0.2f} seconds")
+            problem.check(solution, verbose=1)
+
 
 if __name__ == "__main__":
-    from contexttimer import Timer
-    from loguru import logger
-
-    from tester import Problem, test
-    
     problems = Problem.from_folder("DataSet/Tests")
-    print(problems.keys())
-    melons = problems["melons_en"]
     model = Model()
-    with Timer() as timer:
-        solution = model.create_solution(melons.text)
-    logger.info(f"Created colution in {timer.elapsed:.2f} seconds")
-    test(solution, melons)
+    model.test(problems.values())

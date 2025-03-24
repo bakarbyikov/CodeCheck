@@ -13,6 +13,8 @@ dependencies = [
     "llama-cpp-python (>=0.3.8,<0.4.0)",
     "huggingface-hub (>=0.29.3,<0.30.0)",
     "ipywidgets (>=8.1.5,<9.0.0)",
+    "pydantic (>=2.10.6,<3.0.0)",
+    "contexttimer (>=0.3.3,<0.4.0)",
 ]
 
 

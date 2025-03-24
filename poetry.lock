@@ -305,6 +305,17 @@ traitlets = ">=4"
 test = ["pytest"]
 
 [[package]]
+name = "contexttimer"
+version = "0.3.3"
+description = "A timer context manager measuring the clock wall time of the code block it contains."
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "contexttimer-0.3.3.tar.gz", hash = "sha256:35a1efd389af3f1ca509f33ff23e17d98b66c8fde5ba2a4eb8a8b7fa456598a5"},
+]
+
+[[package]]
 name = "debugpy"
 version = "1.8.13"
 description = "An implementation of the Debug Adapter Protocol for Python"
@@ -2176,4 +2187,4 @@ dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "bb13481d71f496c132780ebc8bbe4f6736cbcfd8d8998a8baa4a290e263944d7"
+content-hash = "084196aeb923b91bd7bdea5506ec84bb4db23f36ee5696df6b81e5d814e25d94"

@@ -85,12 +85,14 @@ class Problem:
             try:
                 tests = Test.from_file(root/"test.csv")
             except FileNotFoundError:
-                logger.warning(f"Can't find text in {root}")
+                logger.warning(f"Can't find tests in {root}")
+                continue
 
             try:
                 text = (root/"text.txt").read_text()
             except FileNotFoundError:
                 logger.warning(f"Can't find text in {root}")
+                continue
 
             try:
                 name = (root/"name.txt").read_text()

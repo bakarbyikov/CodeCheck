@@ -1,4 +1,3 @@
-
 class Config:
     verbose = False
     n_gpu_layers = -1
@@ -14,28 +13,42 @@ class Config:
 
 
 @Config()
-class Qwen14B5Q(Config):
+class Qwen_14B_Q5(Config):
     """9.900 GB"""
     repo_id = "Qwen/Qwen2.5-Coder-14B-Instruct-GGUF"
     filename = "qwen2.5-coder-14b-instruct-q5_0.gguf"
 
 
 @Config()
-class Qwen8(Config):
+class Qwen_7b_Q8(Config):
     """7.718 GB"""
     repo_id = "Qwen/Qwen2.5-Coder-7B-Instruct-GGUF"
     filename = "qwen2.5-coder-7b-instruct-q8_0.gguf"
 
 
 @Config()
-class Qwen2(Config):
+class Qwen_7B_q2(Config):
     """3.254 GB"""
     repo_id = "Qwen/Qwen2.5-Coder-7B-Instruct-GGUF"
     filename = "qwen2.5-coder-7b-instruct-q2_k.gguf"
 
 
+@Config()
+class Qwen_3B_Q8(Config):
+    """~4 GB"""
+    repo_id = "Qwen/Qwen2.5-Coder-3B-Instruct-GGUF"
+    filename = "qwen2.5-coder-3b-instruct-q8_0.gguf"
+
+
+@Config()
+class Coder_GRPO_3B_Q8(Config):
+    """3.503 GB"""
+    repo_id = "yasserrmd/Coder-GRPO-3B"
+    filename = "unsloth.Q8_0.gguf"
+
+
 if __name__ == "__main__":
     from model import Model
-    model = Model(Qwen14B5Q)
+    model = Model(Coder_GRPO_3B_Q8)
 
     input()

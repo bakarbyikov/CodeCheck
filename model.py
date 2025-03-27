@@ -69,20 +69,14 @@ class Model:
             problem.check(solution, verbose=1)
     
     def chat(self, problem: str):
-        sol = model.create_solution(problem)
-        messages = [
-            {"role": "user",
-            "content": f"Solve next problem using python.\n###\n{melons.text}\n###\n"},
-            {"role": "assistant",
-            "content": sol}
-        ]
+        prompt = f"Solve next problem using python.\n###\n{problem}\n###\n"
+        messages = list()
         while True:
-            remark = yield sol
-            messages.append({"role": "user", "content": remark})
-            response = model.message(messages)
-            sol = model.extract_code(response)
+            messages.append({"role": "user", "content": prompt})
+            sol = self.extract_code(self.message(messages))
             messages.append({"role": "assistant",
                             "content": f"```python\n{sol}\n```"})
+            prompt = yield sol
         
 
 
@@ -92,27 +86,8 @@ if __name__ == "__main__":
     
     model = Model()
     
-    # chat = model.chat(melons.text)
-    # chat.send(None)
-    # while True:
-    #     sol = chat.send(input())
-    #     print(f"\n{sol}\n")
-        
-    sol = model.create_solution(melons.text)
-    print(f"Решение задачи: \n {sol}")
-    messages = [
-        {"role": "user",
-         "content": f"Solve next problem using python.\n###\n{melons.text}\n###\n"},
-        {"role": "assistant",
-         "content": sol}
-    ]
+    chat = model.chat(melons.text)
+    sol = chat.send(None)
     while True:
-        remark = input()
-        messages.append({"role": "user", "content": remark})
-        response = model.message(messages)
-        sol = model.extract_code(response)
-        messages.append({"role": "assistant", 
-                         "content": f"```python\n{sol}\n```"})
-        print(f"Новое решение: \n {sol}")
-    
-    
+        print(f"\n{sol}\n")
+        sol = chat.send(input())

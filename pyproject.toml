@@ -1,29 +1,14 @@
 [project]
 name = "codecheck"
 version = "0.1.0"
-description = ""
-authors = [
-    {name = "DigmaBalls",email = "DigmaBalls@gmail.com"}
-]
+description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.12"
 dependencies = [
-    "loguru (>=0.7.3,<0.8.0)",
-    "fastapi[standard] (>=0.115.11,<0.116.0)",
-    "llama-cpp-python (>=0.3.8,<0.4.0)",
-    "huggingface-hub (>=0.29.3,<0.30.0)",
-    "ipywidgets (>=8.1.5,<9.0.0)",
-    "pydantic (>=2.10.6,<3.0.0)",
-    "contexttimer (>=0.3.3,<0.4.0)",
+    "contexttimer>=0.3.3",
+    "fastapi[standard]>=0.115.12",
+    "huggingface-hub>=0.29.3",
+    "llama-cpp-python>=0.3.8",
+    "loguru>=0.7.3",
+    "pydantic>=2.10.6",
 ]
-
-
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.dependencies]
-
-[tool.poetry.group.dev.dependencies]
-ipykernel = "^6.29.5"
-

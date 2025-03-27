@@ -21,8 +21,6 @@ click==8.1.8
     #   uvicorn
 contexttimer==0.3.3
     # via codecheck (pyproject.toml)
-diskcache==5.6.3
-    # via llama-cpp-python
 dnspython==2.7.0
     # via email-validator
 email-validator==2.2.0
@@ -54,11 +52,7 @@ idna==3.10
     #   httpx
     #   requests
 jinja2==3.1.6
-    # via
-    #   fastapi
-    #   llama-cpp-python
-llama-cpp-python==0.3.8
-    # via codecheck (pyproject.toml)
+    # via fastapi
 loguru==0.7.3
     # via codecheck (pyproject.toml)
 markdown-it-py==3.0.0
@@ -67,8 +61,6 @@ markupsafe==3.0.2
     # via jinja2
 mdurl==0.1.2
     # via markdown-it-py
-numpy==2.2.4
-    # via llama-cpp-python
 packaging==24.2
     # via huggingface-hub
 pydantic==2.10.6
@@ -110,7 +102,6 @@ typing-extensions==4.13.0
     #   anyio
     #   fastapi
     #   huggingface-hub
-    #   llama-cpp-python
     #   pydantic
     #   pydantic-core
     #   rich-toolkit

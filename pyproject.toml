@@ -1,14 +1,43 @@
 [project]
-name = "codecheck"
-version = "0.1.0"
+dependencies = [
+  "fastapi[standard]>=0.115.12",
+  "contexttimer>=0.3.3",
+  "huggingface-hub>=0.29.3",
+  "loguru>=0.7.3",
+  "pydantic>=2.10.6",
+]
 description = "Add your description here"
+name = "codecheck"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
-    "contexttimer>=0.3.3",
-    "fastapi[standard]>=0.115.12",
-    "huggingface-hub>=0.29.3",
-    "llama-cpp-python>=0.3.8",
-    "loguru>=0.7.3",
-    "pydantic>=2.10.6",
+version = "0.1.0"
+
+[project.optional-dependencies]
+cpu = [
+  "llama-cpp-python>=0.3.8",
 ]
+cu124 = [
+  "llama-cpp-python>=0.3.4",
+]
+
+[tool.uv]
+conflicts = [
+  [
+    {extra = "cu124"},
+    {extra = "cpu"},
+  ],
+]
+
+[tool.uv.sources]
+llama-cpp-python = [
+  {index = "llama-cpp-cu124", extra = "cu124"},
+  {index = "llama-cpp-cpu", extra = "cpu"},
+]
+
+[[tool.uv.index]]
+name = "llama-cpp-cu124"
+url = "https://abetlen.github.io/llama-cpp-python/whl/cu124"
+
+[[tool.uv.index]]
+name = "llama-cpp-cpu"
+url = "https://pypi.org/simple"

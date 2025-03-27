@@ -6,6 +6,8 @@ from loguru import logger
 
 from tester import Problem
 
+logger.add("model.log")
+
 
 class Model:
     code_pattern = re.compile("```python([^`]*)", re.DOTALL)
@@ -20,24 +22,30 @@ class Model:
             n_threads=16,
             n_ctx=1 << 10,
         )
+    
+    def message(self, messages: list[dict[str, str]]) -> str:
+        response = self.llm.create_chat_completion(messages)
+        content = response["choices"][0]["message"]["content"]
+        logger.debug(f"\n{messages}\n=>\n{content}")
+        return content
+        
 
     def ask(self, text: str) -> str:
-        response = self.llm.create_chat_completion(
-            messages=[
-                {"role": "system",
-                 "content": "You are an expert AI coding assistant."},
-                {"role": "user", "content": text}
-            ],
-        )
-        return response["choices"][0]["message"]["content"]
+        messages = [
+            {"role": "system",
+             "content": "You are an expert AI coding assistant."},
+            {"role": "user", "content": text}
+        ]
+        return self.message(messages)
+        
 
     def extract_code(self, text: str) -> str:
-        print(text)
+        # print(text)
         found = self.code_pattern.search(text)
         return found and found.group(1).strip()
 
     def extract_json(self, text: str) -> str:
-        print(text)
+        # print(text)
         found = self.json_pattern.search(text)
         return found and found.group(1).strip()
 
@@ -59,9 +67,52 @@ class Model:
                 solution = self.create_solution(problem.text)
             logger.info(f"Solved in {timer.elapsed:0.2f} seconds")
             problem.check(solution, verbose=1)
+    
+    def chat(self, problem: str):
+        sol = model.create_solution(problem)
+        messages = [
+            {"role": "user",
+            "content": f"Solve next problem using python.\n###\n{melons.text}\n###\n"},
+            {"role": "assistant",
+            "content": sol}
+        ]
+        while True:
+            remark = yield sol
+            messages.append({"role": "user", "content": remark})
+            response = model.message(messages)
+            sol = model.extract_code(response)
+            messages.append({"role": "assistant",
+                            "content": f"```python\n{sol}\n```"})
+        
 
 
 if __name__ == "__main__":
     problems = Problem.from_folder("DataSet/Tests")
+    melons = problems["melons"]
+    
     model = Model()
-    model.test(problems.values())
+    
+    # chat = model.chat(melons.text)
+    # chat.send(None)
+    # while True:
+    #     sol = chat.send(input())
+    #     print(f"\n{sol}\n")
+        
+    sol = model.create_solution(melons.text)
+    print(f"Решение задачи: \n {sol}")
+    messages = [
+        {"role": "user",
+         "content": f"Solve next problem using python.\n###\n{melons.text}\n###\n"},
+        {"role": "assistant",
+         "content": sol}
+    ]
+    while True:
+        remark = input()
+        messages.append({"role": "user", "content": remark})
+        response = model.message(messages)
+        sol = model.extract_code(response)
+        messages.append({"role": "assistant", 
+                         "content": f"```python\n{sol}\n```"})
+        print(f"Новое решение: \n {sol}")
+    
+    

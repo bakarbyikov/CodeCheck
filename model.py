@@ -1,4 +1,3 @@
-from collections import Counter
 import re
 import sys
 from typing import Any
@@ -8,17 +7,19 @@ from llama_cpp import Llama
 from loguru import logger
 from tqdm import tqdm
 
-from misc import Qwen14B5Q, Qwen2, Qwen8
-from tester import Problem, Status
+from misc import (Coder_GRPO_3B, Coder_GRPO_3B_Q8, Qwen_7B_q2, Qwen_7b_Q8,
+                  Qwen_14B_Q5)
+from tester import Problem, Report, Status
 
 logger.remove()
 logger.add(sys.stderr, level="DEBUG")
+
 
 class Model:
     code_pattern = re.compile("```python([^`]*)", re.DOTALL)
     json_pattern = re.compile("```json([^`]*)", re.DOTALL)
 
-    def __init__(self, config: dict[str, Any] = Qwen8):
+    def __init__(self, config: dict[str, Any] = Qwen_7b_Q8):
         me = id(self)
         self.logger = logger.bind(model=me)
         logger.add(f"model.log",
@@ -27,7 +28,8 @@ class Model:
         self.temp = 1
 
     def message(self, messages: list[dict[str, str]]) -> str:
-        response = self.llm.create_chat_completion(messages, temperature=self.temp)
+        response = self.llm.create_chat_completion(
+            messages, temperature=self.temp)
         content = response["choices"][0]["message"]["content"]
         self.logger.trace(f"\n{messages}\n=>\n{content}")
         return content
@@ -69,35 +71,24 @@ class Model:
                             "content": f"```python\n{sol}\n```"})
             prompt = yield sol
 
-    def test(self, problems: list[Problem], verbosity=2):
-        for problem in problems:
-            with Timer() as timer:
-                solution = self.create_solution(problem.text)
-            if verbosity > 0:
-                logger.info(f"Problem {problem.name}")
-                logger.info(f"Solved in {timer.elapsed:0.2f} seconds")
-            result = problem.check(solution, verbosity=verbosity-1)
-            for status in reversed(Status):
-                if result[status]:
-                    yield status
-                    break
-            else:
-                assert False, f"Problem without tests"
+    def test(self, problem: Problem, verbosity=0):
+        with Timer() as timer:
+            solution = self.create_solution(problem.text)
+        if verbosity > 0:
+            logger.info(f"Problem {problem.name}")
+            logger.info(f"Solved in {timer.elapsed:0.2f} seconds")
+        result = problem.check(solution, verbosity=verbosity-1)
+        for status in reversed(Status):
+            if result[status]:
+                return status
+        else:
+            assert False, f"Problem without tests"
 
 
 if __name__ == "__main__":
     problems = Problem.from_folder("DataSet/Tests")
-    melons = problems["melons"]
+    melons = problems["melons_en"]
 
-    model = Model(Qwen14B5Q)
-    results = Counter(i for i in tqdm(model.test([melons]*30, verbosity=0), file=sys.stderr, total=30))
+    model = Model(Coder_GRPO_3B_Q8)
+    results = Report(map(model.test, tqdm([melons]*25, file=sys.stderr)))
     logger.info(results)
-    
-    # print(*, sep='\n')
-    
-
-    # chat = model.chat(melons.text)
-    # sol = chat.send(None)
-    # while True:
-    #     print(f"\n{sol}\n")
-    #     sol = chat.send(input())

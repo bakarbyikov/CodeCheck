@@ -3,7 +3,6 @@ from collections import Counter
 from csv import DictReader
 from enum import Enum, auto
 from io import StringIO
-from itertools import count
 from pathlib import Path
 from typing import Self
 
@@ -25,6 +24,13 @@ class Status(Enum):
 class Result:
     status: Status
     info: str
+
+
+class Report(Counter):
+    def __str__(self):
+        names = "/".join(s.name for s in Status)
+        values = "/".join(str(self[s]) for s in Status)
+        return f"{names}: {values}"
 
 
 @dataclass
@@ -83,42 +89,44 @@ class Problem:
                 continue
 
             try:
-                tests = Test.from_file(root/"test.csv")
+                problem = cls.open(root)
             except FileNotFoundError:
-                logger.warning(f"Can't find tests in {root}")
                 continue
 
-            try:
-                text = (root/"text.txt").read_text()
-            except FileNotFoundError:
-                logger.warning(f"Can't find text in {root}")
+            if problem.name in found:
+                logger.warning(f"Problem {problem.name=} is not unique")
                 continue
 
-            try:
-                name = (root/"name.txt").read_text()
-            except FileNotFoundError:
-                name = root.name
-
-            if name in found:
-                for i in count(1):
-                    indexed = f"{name}_{i}"
-                    if indexed not in found:
-                        name = indexed
-                        break
-                logger.warning(
-                    f"Problem {name=} is not unique, replacing with {indexed}")
-
-            found[name] = cls(name, text, tests, str(root))
+            found[problem.name] = problem
         return found
 
+    @classmethod
+    def open(cls, path: Path) -> Self:
+        try:
+            tests = Test.from_file(path/"test.csv")
+        except FileNotFoundError:
+            logger.warning(f"Can't find tests in {path}")
+            raise
+
+        try:
+            text = (path/"text.txt").read_text()
+        except FileNotFoundError:
+            logger.warning(f"Can't find text in {path}")
+            raise
+
+        try:
+            name = (path/"name.txt").read_text().strip()
+        except FileNotFoundError:
+            name = path.name
+
+        return cls(name, text, tests, str(path))
+
     def check(self, solution: str, verbosity=0) -> dict[Status, int]:
-        stats = Counter(test.run(solution, verbosity-1).status 
+        result = Report(test.run(solution, verbosity-1).status
                         for test in self.tests)
         if verbosity > 0:
-            names = "/".join(s.name for s in Status)
-            values = "/".join(str(stats[s]) for s in Status)
-            logger.info(f"{names}: {values}")
-        return stats
+            logger.info(result)
+        return result
 
 
 if __name__ == "__main__":

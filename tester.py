@@ -40,9 +40,9 @@ class Test:
             reader = DictReader(file)
             return [cls(index=i, **row) for i, row in enumerate(reader)]
 
-    def run(self, solution: str, verbose=False) -> Result:
+    def run(self, solution: str, verbosity=0) -> Result:
         result = self._run(solution)
-        if verbose:
+        if verbosity > 0:
             i, expected, got = self.index, self.expected, result.info
             match result.status:
                 case Status.Passed:
@@ -111,10 +111,10 @@ class Problem:
             found[name] = cls(name, text, tests, str(root))
         return found
 
-    def check(self, solution: str, verbose=0) -> dict[Status, int]:
-        stats = Counter(test.run(solution, verbose > 1).status 
+    def check(self, solution: str, verbosity=0) -> dict[Status, int]:
+        stats = Counter(test.run(solution, verbosity-1).status 
                         for test in self.tests)
-        if verbose:
+        if verbosity > 0:
             names = "/".join(s.name for s in Status)
             values = "/".join(str(stats[s]) for s in Status)
             logger.info(f"{names}: {values}")
@@ -125,4 +125,4 @@ if __name__ == "__main__":
     problems = Problem.from_folder("DataSet/Tests")
     melons = problems["melons"]
     solution = "1/0"
-    melons.check(solution, verbose=2)
+    melons.check(solution, verbosity=2)

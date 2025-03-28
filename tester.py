@@ -48,15 +48,14 @@ class Test:
 
     def run(self, solution: str, verbosity=0) -> Result:
         result = self._run(solution)
-        if verbosity > 0:
-            i, expected, got = self.index, self.expected, result.info
-            match result.status:
-                case Status.Passed:
-                    logger.success(f"Test #{i} passed {expected=} {got=}")
-                case Status.Failed:
-                    logger.error(f"Test #{i} failed {expected=} {got=}")
-                case Status.Error:
-                    logger.error(f"Test #{i} failed with {got}")
+        i, expected, got = self.index, self.expected, result.info
+        match result.status:
+            case Status.Passed:
+                logger.trace(f"Test #{i} passed {expected=} {got=}")
+            case Status.Failed:
+                logger.trace(f"Test #{i} failed {expected=} {got=}")
+            case Status.Error:
+                logger.trace(f"Test #{i} failed with {got}")
         return result
 
     def _run(self, solution: str) -> Result:
@@ -109,7 +108,7 @@ class Problem:
             raise
 
         try:
-            text = (path/"text.txt").read_text()
+            text = (path/"text.md").read_text()
         except FileNotFoundError:
             logger.warning(f"Can't find text in {path}")
             raise
@@ -121,16 +120,16 @@ class Problem:
 
         return cls(name, text, tests, str(path))
 
-    def check(self, solution: str, verbosity=0) -> dict[Status, int]:
-        result = Report(test.run(solution, verbosity-1).status
+    def check(self, solution: str) -> dict[Status, int]:
+        result = Report(test.run(solution).status
                         for test in self.tests)
-        if verbosity > 0:
-            logger.info(result)
+        logger.trace(result)
         return result
 
 
 if __name__ == "__main__":
     problems = Problem.from_folder("DataSet/Tests")
+    logger.info(problems.keys())
     melons = problems["melons"]
     solution = "1/0"
     melons.check(solution, verbosity=2)

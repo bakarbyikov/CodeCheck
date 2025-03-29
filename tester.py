@@ -1,13 +1,15 @@
-import sys
 from collections import Counter
 from csv import DictReader
 from enum import Enum, auto
-from io import StringIO
 from pathlib import Path
+from subprocess import PIPE, Popen
+from tempfile import NamedTemporaryFile
 from typing import Self
 
 from loguru import logger
 from pydantic.dataclasses import dataclass
+
+import misc
 
 
 class SolutionError(Exception):
@@ -46,7 +48,7 @@ class Test:
             reader = DictReader(file)
             return [cls(index=i, **row) for i, row in enumerate(reader)]
 
-    def run(self, solution: str, verbosity=0) -> Result:
+    def run(self, solution: str) -> Result:
         result = self._run(solution)
         i, expected, got = self.index, self.expected, result.info
         match result.status:
@@ -55,19 +57,20 @@ class Test:
             case Status.Failed:
                 logger.trace(f"Test #{i} failed {expected=} {got=}")
             case Status.Error:
-                logger.trace(f"Test #{i} failed with {got}")
+                logger.trace(f"Test #{i} error: {got}")
         return result
 
     def _run(self, solution: str) -> Result:
-        sys.stdin = StringIO(self.input)
-        sys.stdout = out = StringIO()
+        with NamedTemporaryFile(mode='w') as script:
+            print(solution, file=script, flush=True)
 
-        try:
-            exec(solution, {}, {})
-        except Exception as e:
-            return Result(Status.Error, str(e))
+            child = Popen(['python3', script.name],
+                          stdin=PIPE, stdout=PIPE, stderr=PIPE,
+                          text=True, )
+            got, stderr = map(str.strip, child.communicate(self.input))
 
-        got = out.getvalue().strip()
+        if stderr:
+            return Result(Status.Error, stderr)
         if got != self.expected:
             return Result(Status.Failed, got)
         return Result(Status.Passed, got)
@@ -120,7 +123,7 @@ class Problem:
 
         return cls(name, text, tests, str(path))
 
-    def check(self, solution: str) -> dict[Status, int]:
+    def check(self, solution: str) -> Report:
         result = Report(test.run(solution).status
                         for test in self.tests)
         logger.trace(result)
@@ -132,4 +135,4 @@ if __name__ == "__main__":
     logger.info(problems.keys())
     melons = problems["melons"]
     solution = "1/0"
-    melons.check(solution, verbosity=2)
+    print(melons.check(solution))

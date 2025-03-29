@@ -1,0 +1,5 @@
+input,expected,required
+0 0,None,0
+1 0,None,0
+1 1,2.414214,0
+-1 -1,2.414214,0

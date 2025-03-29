@@ -7,12 +7,8 @@ from llama_cpp import Llama
 from loguru import logger
 from tqdm import tqdm
 
-from misc import (Coder_GRPO_3B, Coder_GRPO_3B_Q8, Qwen_7B_q2, Qwen_7b_Q8,
-                  Qwen_14B_Q5)
+from misc import *
 from tester import Problem, Report, Status
-
-logger.remove()
-logger.add(sys.stderr, level="DEBUG")
 
 
 class Model:
@@ -22,10 +18,10 @@ class Model:
     def __init__(self, config: dict[str, Any] = Qwen_7b_Q8):
         me = id(self)
         self.logger = logger.bind(model=me)
-        logger.add(f"model.log",
+        logger.add(f"model.log", level="TRACE",
                    filter=lambda record: record["extra"].get("model") == me)
         self.llm = Llama.from_pretrained(**config)
-        self.temp = 1
+        self.temp = 0.2
 
     def message(self, messages: list[dict[str, str]]) -> str:
         response = self.llm.create_chat_completion(
@@ -44,14 +40,20 @@ class Model:
 
     def extract_code(self, text: str) -> str:
         found = self.code_pattern.search(text)
-        return found and found.group(1).strip()
+        if found is None:
+            logger.trace("Python code not found")
+            return found
+        return found.group(1).strip()
 
     def extract_json(self, text: str) -> str:
         found = self.json_pattern.search(text)
-        return found and found.group(1).strip()
+        if found is None:
+            logger.trace("Json not found")
+            return found
+        return found.group(1).strip()
 
     def create_solution(self, problem: str) -> str:
-        prompt = f"Solve next problem using python.\n###\n{problem}\n###\n"
+        prompt = f"Solve next problem using python.Don't use third party libraries.\n###\n{problem}\n###\n"
         return self.extract_code(self.ask(prompt))
 
     def create_tests(self, problem: str, code: str) -> str:
@@ -71,13 +73,14 @@ class Model:
                             "content": f"```python\n{sol}\n```"})
             prompt = yield sol
 
-    def test(self, problem: Problem, verbosity=0):
+    def test(self, problem: Problem):
+        logger.trace(f"Problem {problem.name}")
         with Timer() as timer:
             solution = self.create_solution(problem.text)
-        if verbosity > 0:
-            logger.info(f"Problem {problem.name}")
-            logger.info(f"Solved in {timer.elapsed:0.2f} seconds")
-        result = problem.check(solution, verbosity=verbosity-1)
+        logger.trace(f"Solved in {timer.elapsed:0.2f} seconds")
+        if not solution:
+            return Status.Error
+        result = problem.check(solution)
         for status in reversed(Status):
             if result[status]:
                 return status
@@ -87,8 +90,8 @@ class Model:
 
 if __name__ == "__main__":
     problems = Problem.from_folder("DataSet/Tests")
-    melons = problems["melons_en"]
+    to_test = problems.values()
 
-    model = Model(Coder_GRPO_3B_Q8)
-    results = Report(map(model.test, tqdm([melons]*25, file=sys.stderr)))
+    model = Model(Qwen_7B_q2)
+    results = Report(map(model.test, tqdm(to_test, file=sys.stderr)))
     logger.info(results)

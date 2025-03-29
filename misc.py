@@ -1,8 +1,17 @@
+import sys
+
+from loguru import logger
+
+logger.remove()
+logger.add(sys.stderr, level="TRACE")
+logger.add("trace_long.log", level="TRACE")
+
+
 class Config:
     verbose = False
     n_gpu_layers = -1
     n_threads = 16
-    n_ctx = 1 << 9
+    n_ctx = 1 << 11
     use_mmap = False
 
     @staticmethod

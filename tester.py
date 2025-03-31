@@ -27,7 +27,28 @@ class Status(Enum):
 @dataclass
 class Result:
     status: Status
-    info: str
+    expected: str
+    got: str
+    error: str
+
+    @classmethod
+    def from_inputs(cls, expected: str, got: str, error: str) -> Self:
+        if error:
+            status = Status.Error
+        elif got != expected:
+            status = Status.Failed
+        else:
+            status = Status.Passed
+        return cls(status, expected, got, error)
+
+    def __str__(self):
+        match self.status:
+            case Status.Passed:
+                return f"passed"
+            case Status.Failed:
+                return f"failed expected: {self.expected}, got: {self.got}"
+            case Status.Error:
+                return f"error:\n{self.error}"
 
 
 class Report(Counter):
@@ -51,31 +72,16 @@ class Test:
             return [cls(index=i, **row) for i, row in enumerate(reader)]
 
     def run(self, solution: str) -> Result:
-        result = self._run(solution)
-        i, expected, got = self.index, self.expected, result.info
-        match result.status:
-            case Status.Passed:
-                logger.trace(f"Test #{i} passed {expected=} {got=}")
-            case Status.Failed:
-                logger.trace(f"Test #{i} failed {expected=} {got=}")
-            case Status.Error:
-                logger.trace(f"Test #{i} error: {got}")
-        return result
-
-    def _run(self, solution: str) -> Result:
         with NamedTemporaryFile(mode='w') as script:
             print(solution, file=script, flush=True)
 
             child = Popen(['python3', script.name],
                           stdin=PIPE, stdout=PIPE, stderr=PIPE,
                           text=True, )
-            got, errors = map(str.strip, child.communicate(self.input))
-
-        if errors:
-            return Result(Status.Error, errors)
-        if got != self.expected:
-            return Result(Status.Failed, got)
-        return Result(Status.Passed, got)
+            got, error = map(str.strip, child.communicate(self.input))
+        result = Result.from_inputs(self.expected, got, error)
+        logger.trace(f"Test #{self.index} {result}")
+        return result
 
 
 @dataclass
@@ -143,4 +149,4 @@ if __name__ == "__main__":
     logger.info(problems.tags())
     melons, *_ = problems.by_tag("melons")
     solution = "1/0"
-    print(melons.check(solution))
+    logger.info(melons.check(solution))

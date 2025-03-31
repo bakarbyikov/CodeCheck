@@ -8,11 +8,12 @@ from loguru import logger
 from tqdm import tqdm
 
 from misc import *
-from tester import Problem, Report, Status
+from tester import Problem, ProblemSet, Report, Status
 
 
 class Model:
-    code_pattern = re.compile("```python([^`]*)", re.DOTALL)
+    # code_pattern = re.compile("```python([^`]*)", re.DOTALL)
+    code_pattern = re.compile("```(?:python)?([^`]*)", re.DOTALL)
     json_pattern = re.compile("```json([^`]*)", re.DOTALL)
 
     def __init__(self, config: dict[str, Any] = Qwen_7b_Q8):
@@ -53,7 +54,7 @@ class Model:
         return found.group(1).strip()
 
     def create_solution(self, problem: str) -> str:
-        prompt = f"Solve next problem using python.Don't use third party libraries.\n###\n{problem}\n###\n"
+        prompt = f"Solve next problem using python.Don't use third party libraries. Don't add prompt in input.\n###\n{problem}\n###\n"
         return self.extract_code(self.ask(prompt))
 
     def create_tests(self, problem: str, code: str) -> str:
@@ -74,7 +75,7 @@ class Model:
             prompt = yield sol
 
     def test(self, problem: Problem):
-        logger.trace(f"Problem {problem.name}")
+        logger.trace(f"Problem {problem.tags}")
         with Timer() as timer:
             solution = self.create_solution(problem.text)
         logger.trace(f"Solved in {timer.elapsed:0.2f} seconds")
@@ -89,8 +90,8 @@ class Model:
 
 
 if __name__ == "__main__":
-    problems = Problem.from_folder("DataSet/Tests")
-    to_test = problems.values()
+    problems = ProblemSet.from_folder("DataSet/Tests")
+    to_test = list(problems.by_tag("Tests"))
 
     model = Model(Qwen_7B_q2)
     results = Report(map(model.test, tqdm(to_test, file=sys.stderr)))

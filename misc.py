@@ -13,6 +13,9 @@ class Config:
     n_threads = 16
     n_ctx = 1 << 11
     use_mmap = False
+    
+    repo_id = None
+    filename = None
 
     @staticmethod
     def __call__(cls: object):
@@ -44,7 +47,7 @@ class Qwen_7B_q2(Config):
 
 @Config()
 class Qwen_3B_Q8(Config):
-    """~4 GB"""
+    """3.557 GB"""
     repo_id = "Qwen/Qwen2.5-Coder-3B-Instruct-GGUF"
     filename = "qwen2.5-coder-3b-instruct-q8_0.gguf"
 
@@ -55,9 +58,18 @@ class Coder_GRPO_3B_Q8(Config):
     repo_id = "yasserrmd/Coder-GRPO-3B"
     filename = "unsloth.Q8_0.gguf"
 
+@Config()
+class Yandex_8B_Q4(Config):
+    """~5 GB - half gpu"""
+    n_gpu_layers = 21
+    use_mmap = True
+    repo_id = "yandex/YandexGPT-5-Lite-8B-instruct-GGUF"
+    filename = "YandexGPT-5-Lite-8B-instruct-Q4_K_M.gguf"
+    
+
 
 if __name__ == "__main__":
     from model import Model
-    model = Model(Coder_GRPO_3B_Q8)
+    model = Model(Qwen_3B_Q8)
 
     input()

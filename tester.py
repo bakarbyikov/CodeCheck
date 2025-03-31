@@ -1,10 +1,12 @@
 from collections import Counter
 from csv import DictReader
 from enum import Enum, auto
+from functools import partial
+from itertools import chain
 from pathlib import Path
 from subprocess import PIPE, Popen
 from tempfile import NamedTemporaryFile
-from typing import Self
+from typing import Generator, Self
 
 from loguru import logger
 from pydantic.dataclasses import dataclass
@@ -67,10 +69,10 @@ class Test:
             child = Popen(['python3', script.name],
                           stdin=PIPE, stdout=PIPE, stderr=PIPE,
                           text=True, )
-            got, stderr = map(str.strip, child.communicate(self.input))
+            got, errors = map(str.strip, child.communicate(self.input))
 
-        if stderr:
-            return Result(Status.Error, stderr)
+        if errors:
+            return Result(Status.Error, errors)
         if got != self.expected:
             return Result(Status.Failed, got)
         return Result(Status.Passed, got)
@@ -78,29 +80,9 @@ class Test:
 
 @dataclass
 class Problem:
-    name: str
     text: str
     tests: list[Test]
-    path: str
-
-    @classmethod
-    def from_folder(cls, folder: str) -> dict[str, Self]:
-        found = dict()
-        for root, dirs, files in Path(folder).walk():
-            if not files:
-                continue
-
-            try:
-                problem = cls.open(root)
-            except FileNotFoundError:
-                continue
-
-            if problem.name in found:
-                logger.warning(f"Problem {problem.name=} is not unique")
-                continue
-
-            found[problem.name] = problem
-        return found
+    tags: set[str]
 
     @classmethod
     def open(cls, path: Path) -> Self:
@@ -116,12 +98,9 @@ class Problem:
             logger.warning(f"Can't find text in {path}")
             raise
 
-        try:
-            name = (path/"name.txt").read_text().strip()
-        except FileNotFoundError:
-            name = path.name
+        tags = path.parts
 
-        return cls(name, text, tests, str(path))
+        return cls(text, tests, tags)
 
     def check(self, solution: str) -> Report:
         result = Report(test.run(solution).status
@@ -129,10 +108,39 @@ class Problem:
         logger.trace(result)
         return result
 
+    def has_tag(self, tag: str) -> bool:
+        return tag in self.tags
+
+
+@dataclass
+class ProblemSet:
+    problems: list[Problem]
+
+    @classmethod
+    def from_folder(cls, folder: str):
+        problems = list()
+        for root, dirs, files in Path(folder).walk():
+            if not files:
+                continue
+
+            try:
+                problem = Problem.open(root)
+            except FileNotFoundError:
+                continue
+
+            problems.append(problem)
+        return cls(problems)
+
+    def by_tag(self, tag: str) -> Generator[Problem, None, None]:
+        yield from filter(partial(Problem.has_tag, tag=tag), self.problems)
+
+    def tags(self) -> dict[str, int]:
+        return Counter(chain.from_iterable(problem.tags for problem in self.problems))
+
 
 if __name__ == "__main__":
-    problems = Problem.from_folder("DataSet/Tests")
-    logger.info(problems.keys())
-    melons = problems["melons"]
+    problems = ProblemSet.from_folder("DataSet/Tests")
+    logger.info(problems.tags())
+    melons, *_ = problems.by_tag("melons")
     solution = "1/0"
     print(melons.check(solution))

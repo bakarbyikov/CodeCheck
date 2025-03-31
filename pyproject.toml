@@ -41,3 +41,8 @@ url = "https://abetlen.github.io/llama-cpp-python/whl/cu124"
 [[tool.uv.index]]
 name = "llama-cpp-cpu"
 url = "https://pypi.org/simple"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+]

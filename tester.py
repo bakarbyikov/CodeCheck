@@ -123,7 +123,7 @@ class ProblemSet:
     problems: list[Problem]
 
     @classmethod
-    def from_folder(cls, folder: str):
+    def from_folder(cls, folder: str = "DataSet/Tests"):
         problems = list()
         for root, dirs, files in Path(folder).walk():
             if not files:

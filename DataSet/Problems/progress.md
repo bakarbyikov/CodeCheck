@@ -1,10 +1,10 @@
 # ПЗ_2_ПиОА
 ## 5.1
 ### 1
-evaluate_sin
+sin_neg_root
 
 ### 2
-evaluate_two
+three_terms
 
 ### 3 - 6
 Writed

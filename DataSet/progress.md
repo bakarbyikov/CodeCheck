@@ -1,26 +1,27 @@
 # ПЗ_2_ПиОА
 ## 5.1
+eval
 ### 1
 sin_neg_root
-
 ### 2
 three_terms
-
-###
+### 3
 big_dumb
 
 ### 4 - 6
 Writed
 
 ## 5.2
+bool
 ### 1 
 armstrong
 ### 2
-len_five_even
+has_even
 ### 3
-len_three_min_odd
+has_odd_min
 ### 4
-len_for_odd_even
+has_both
+
 ### 5-6
 Writed
 

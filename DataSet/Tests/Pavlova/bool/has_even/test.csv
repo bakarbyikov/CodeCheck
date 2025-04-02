@@ -1,0 +1,7 @@
+input,expected
+13579,False
+20000,True
+12000,True
+10200,True
+10020,True
+10002,True

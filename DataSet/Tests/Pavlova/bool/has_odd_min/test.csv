@@ -1,0 +1,7 @@
+input,expected
+199,True
+919,True
+991,True
+299,False
+929,False
+992,False

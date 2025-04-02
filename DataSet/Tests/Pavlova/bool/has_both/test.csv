@@ -1,0 +1,4 @@
+input,expected
+1200,True
+1111,False
+2222,False

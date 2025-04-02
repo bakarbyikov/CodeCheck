@@ -12,7 +12,13 @@ Writed
 ## 5.2
 ### 1 
 armstrong
-### 2-6
+### 2
+len_five_even
+### 3
+len_three_min_odd
+### 4
+len_for_odd_even
+### 5-6
 Writed
 
 # ПЗ_7_ПиОА

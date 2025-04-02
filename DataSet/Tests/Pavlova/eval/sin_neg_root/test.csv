@@ -1,4 +1,4 @@
 input,expected,required
 0,None,0
 1,0.909297,0
--1,0.000000,0
+-1,0.0,0

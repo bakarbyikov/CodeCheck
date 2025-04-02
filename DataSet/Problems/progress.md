@@ -10,7 +10,9 @@ evaluate_two
 Writed
 
 ## 5.2
-### 1-6
+### 1 
+armstrong
+### 2-6
 Writed
 
 # ПЗ_7_ПиОА

@@ -1,3 +1,4 @@
+from pathlib import Path
 import sys
 
 from loguru import logger
@@ -7,13 +8,20 @@ logger.add(sys.stderr, level="TRACE")
 logger.add("trace_long.log", level="TRACE")
 
 
+def try_read(path: Path) -> str | None:
+    try:
+        return path.read_text()
+    except FileNotFoundError:
+        return None
+
+
 class Config:
     verbose = False
     n_gpu_layers = -1
     n_threads = 16
     n_ctx = 1 << 11
     use_mmap = False
-    
+
     repo_id = None
     filename = None
 
@@ -58,6 +66,7 @@ class Coder_GRPO_3B_Q8(Config):
     repo_id = "yasserrmd/Coder-GRPO-3B"
     filename = "unsloth.Q8_0.gguf"
 
+
 @Config()
 class Yandex_8B_Q4(Config):
     """~5 GB - half gpu"""
@@ -65,7 +74,6 @@ class Yandex_8B_Q4(Config):
     use_mmap = True
     repo_id = "yandex/YandexGPT-5-Lite-8B-instruct-GGUF"
     filename = "YandexGPT-5-Lite-8B-instruct-Q4_K_M.gguf"
-    
 
 
 if __name__ == "__main__":

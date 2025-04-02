@@ -11,7 +11,7 @@ from typing import Generator, Self
 from loguru import logger
 from pydantic.dataclasses import dataclass
 
-import misc
+from misc import try_read
 
 
 class SolutionError(Exception):
@@ -56,6 +56,10 @@ class Report(Counter):
         names = "/".join(s.name for s in Status)
         values = "/".join(str(self[s]) for s in Status)
         return f"{names}: {values}"
+    
+    def status(self) -> Status:
+        return next(status for status in reversed(Status)
+                    if self[status])
 
 
 @dataclass
@@ -63,13 +67,14 @@ class Test:
     index: int
     input: str
     expected: str
-    required: bool
 
     @classmethod
     def from_file(cls, path: Path) -> list[Self]:
-        with path.open() as file:
-            reader = DictReader(file)
-            return [cls(index=i, **row) for i, row in enumerate(reader)]
+        text = try_read(path)
+        # if not text:
+        #     return list()
+        reader = DictReader(text.splitlines() or list())
+        return [cls(i, **row) for i, row in enumerate(reader)]
 
     def run(self, solution: str) -> Result:
         with NamedTemporaryFile(mode='w') as script:
@@ -86,33 +91,42 @@ class Test:
 
 @dataclass
 class Problem:
+    name: str
     text: str
+    solution: str | None
     tests: list[Test]
     tags: set[str]
 
     @classmethod
     def open(cls, path: Path) -> Self:
-        try:
-            tests = Test.from_file(path/"test.csv")
-        except FileNotFoundError:
-            logger.warning(f"Can't find tests in {path}")
-            raise
-
-        try:
-            text = (path/"text.md").read_text()
-        except FileNotFoundError:
+        name = try_read(path/"name.txt") or path.parts[-1]
+        
+        text = try_read(path/"text.md")
+        if not text:
             logger.warning(f"Can't find text in {path}")
-            raise
+            return None
+
+        solution = try_read(path/"solution.py")
+        if not solution:
+            logger.warning(f"Can't find solution in {path}")
+
+        tests = Test.from_file(path/"test.csv")
+        if not tests:
+            logger.warning(f"Can't find tests in {path}")
 
         tags = path.parts
 
-        return cls(text, tests, tags)
+        return cls(name, text, solution, tests, tags)
 
-    def check(self, solution: str) -> Report:
+    def check(self, solution: str) -> Status:
+        logger.trace(f"Problem: {self.name}")
         result = Report(test.run(solution).status
                         for test in self.tests)
         logger.trace(result)
-        return result
+        return result.status()
+
+    def self_check(self) -> Status:
+        return self.check(self.solution)
 
     def has_tag(self, tag: str) -> bool:
         return tag in self.tags
@@ -129,13 +143,17 @@ class ProblemSet:
             if not files:
                 continue
 
-            try:
-                problem = Problem.open(root)
-            except FileNotFoundError:
+            problem = Problem.open(root)
+            if not problem:
                 continue
-
+            
             problems.append(problem)
         return cls(problems)
+
+    def self_check(self) -> Report:
+        result = Report(map(Problem.self_check, self.problems))
+        logger.trace(f"ProblemSet selftest: {result}")
+        return result
 
     def by_tag(self, tag: str) -> Generator[Problem, None, None]:
         yield from filter(partial(Problem.has_tag, tag=tag), self.problems)
@@ -145,8 +163,10 @@ class ProblemSet:
 
 
 if __name__ == "__main__":
-    problems = ProblemSet.from_folder("DataSet/Tests")
-    logger.info(problems.tags())
-    melons, *_ = problems.by_tag("melons")
-    solution = "1/0"
-    logger.info(melons.check(solution))
+    problems = ProblemSet.from_folder()
+    logger.info(problems.self_check())
+    
+    # logger.info(problems.tags())
+    # melons, *_=problems.by_tag("melons")
+    # solution="1/0"
+    # logger.info(melons.check(solution))

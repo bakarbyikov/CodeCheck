@@ -3,7 +3,7 @@ import sys
 from typing import Any
 
 from contexttimer import Timer
-from llama_cpp import Llama
+import ollama
 from loguru import logger
 from tqdm import tqdm
 
@@ -12,7 +12,6 @@ from tester import Problem, ProblemSet, Report, Status
 
 
 class Model:
-    # code_pattern = re.compile("```python([^`]*)", re.DOTALL)
     code_pattern = re.compile("```(?:python)?([^`]*)", re.DOTALL)
     json_pattern = re.compile("```json([^`]*)", re.DOTALL)
 
@@ -21,13 +20,14 @@ class Model:
         self.logger = logger.bind(model=me)
         logger.add(f"model.log", level="TRACE",
                    filter=lambda record: record["extra"].get("model") == me)
-        self.llm = Llama.from_pretrained(**config)
-        self.temp = 0.2
 
     def message(self, messages: list[dict[str, str]]) -> str:
-        response = self.llm.create_chat_completion(
-            messages, temperature=self.temp)
-        content = response["choices"][0]["message"]["content"]
+        response = ollama.chat(
+            "qwen2.5-coder:7b",
+            # "qwen2.5-coder:3b",
+            messages,
+        )
+        content = response.message.content
         self.logger.trace(f"\n{messages}\n=>\n{content}")
         return content
 
@@ -74,19 +74,13 @@ class Model:
                             "content": f"```python\n{sol}\n```"})
             prompt = yield sol
 
-    def test(self, problem: Problem):
-        logger.trace(f"Problem {problem.tags}")
+    def test(self, problem: Problem) -> Status:
         with Timer() as timer:
             solution = self.create_solution(problem.text)
         logger.trace(f"Solved in {timer.elapsed:0.2f} seconds")
         if not solution:
             return Status.Error
-        result = problem.check(solution)
-        for status in reversed(Status):
-            if result[status]:
-                return status
-        else:
-            assert False, f"Problem without tests"
+        return problem.check(solution)
 
 
 if __name__ == "__main__":

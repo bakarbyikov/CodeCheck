@@ -2,8 +2,6 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel
 
-Solution = str
-
 
 class Message(BaseModel):
     role: Literal["user", "assistant"]
@@ -15,13 +13,17 @@ class Test(BaseModel):
     expected: str
 
 
+class MessagesRequest(BaseModel):
+    messages: list[Message]
+
+
+class ProblemRequest(BaseModel):
+    problem: str
+
+
 class SolutionResponse(BaseModel):
-    solution: Optional[Solution]
+    solution: Optional[str]
 
 
 class TestsResponse(BaseModel):
     tests: list[Test]
-
-
-class ChatResponse(SolutionResponse):
-    pass

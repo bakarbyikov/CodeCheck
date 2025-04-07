@@ -1,7 +1,6 @@
-import json
 import re
 import sys
-from typing import Any, Optional
+from typing import Optional
 
 import ollama
 from contexttimer import Timer
@@ -9,7 +8,7 @@ from loguru import logger
 from tqdm import tqdm
 
 from misc import *
-from schema import Message, Solution, Test, TestsResponse
+from schema import Message, Test, TestsResponse
 from tester import Problem, ProblemSet, Report, Status
 
 
@@ -64,40 +63,36 @@ class Model:
         ]
         return self.message(messages)
 
-    def extract_code(self, text: str) -> str | None:
+    def extract_code(self, text: str) -> Optional[str]:
         found = self.code_pattern.search(text)
         if found is None:
             logger.trace("Python code not found")
             return found
         return found.group(1).strip()
 
-    def extract_json(self, text: str) -> str | None:
+    def extract_json(self, text: str) -> Optional[str]:
         found = self.json_pattern.search(text)
         if found is None:
             logger.trace("Json not found")
             return found
         return found.group(1).strip()
 
-    def extract_tests(self, text: str) -> TestsResponse:
+    def extract_tests(self, text: str) -> list[Test]:
         tests = (self.extract_json(text)
                  or self.extract_code(text))
         if not tests:
             return list()
-        return TestsResponse.model_validate_json(tests)
+        return TestsResponse.model_validate_json(tests).tests
 
-    def create_solution(
-        self, problem: str
-    ) -> Optional[Solution]:
+    def create_solution(self, problem: str) -> Optional[str]:
         prompt = Prompts.solve(problem)
         return self.extract_code(self.ask(prompt))
 
-    def create_tests(self, problem: str) -> TestsResponse:
+    def create_tests(self, problem: str) -> list[Test]:
         prompt = Prompts.tests(problem)
         return self.extract_tests(self.ask(prompt))
 
-    def chat(
-        self, messages: list[Message]
-    ) -> Optional[Solution]:
+    def chat(self, messages: list[Message]) -> Optional[str]:
         problem = messages[0].content
         messages[0] = Message(
             role="user",

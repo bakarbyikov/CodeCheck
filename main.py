@@ -2,26 +2,28 @@ import uvicorn
 from fastapi import FastAPI
 
 from model import Model
-from schema import ChatResponse, Message, SolutionResponse, TestsResponse
+from schema import (MessagesRequest, ProblemRequest,
+                    SolutionResponse, TestsResponse)
 
 app = FastAPI()
 
 
 @app.post("/chat")
-def chat(messages: list[Message]) -> ChatResponse:
-    solution = Model().chat(messages)
-    return ChatResponse(solution=solution)
+def chat(request: MessagesRequest):
+    solution = Model().chat(request.messages)
+    return SolutionResponse(solution=solution)
 
 
 @app.post("/create_solution")
-def create_solution(problem: str) -> SolutionResponse:
-    solution = Model().create_solution(problem)
+def create_solution(request: ProblemRequest):
+    solution = Model().create_solution(request.problem)
     return SolutionResponse(solution=solution)
 
 
 @app.post("/create_tests")
-def create_tests(problem: str) -> TestsResponse:
-    return Model().create_tests(problem)
+def create_tests(request: ProblemRequest):
+    tests = Model().create_tests(request.problem)
+    return TestsResponse(tests=tests)
 
 
 if __name__ == "__main__":

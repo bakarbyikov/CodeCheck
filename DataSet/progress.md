@@ -1,5 +1,5 @@
 # ПЗ_2_ПиОА
-## 5.1
+## 5.1 +
 eval
 ### 1
 sin_neg_root
@@ -7,9 +7,15 @@ sin_neg_root
 three_terms
 ### 3
 big_dumb
-
-### 4 - 6
-Writed
+### 4
+text/triangle
+!bad tests
+### 5
+text/trapezoid
+!bad tests
+### 6
+text/fee
+!bad tests
 
 ## 5.2
 bool

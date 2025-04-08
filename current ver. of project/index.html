@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>CodeCheck</title>
+    <link rel="shortcut icon" type="image/ico" href="images/favicon.ico">
+    <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet/less" type="text/css" href="test.less"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/less" ></script>
+    <header class="p-3 mb-3 border-bottom">
+      <div class="container-fluid">
+        <div class="nav d-flex align-items-center justify-content-lg-start">
+          <ul class="nav flex-wrap col-12 col-lg-auto me-lg-auto justify-content-center mb-md-0 align-items-center">
+            <li>
+              <a href="#" class="nav-link d-flex">
+                <img src="images/utmn_inv1_eng.png" id="utmn-logo" class="img-fluid">
+              </a>
+            </li>
+            <li><a href="#" class="nav-link text-dark">В начало</a></li>
+            <li><a href="#" class="nav-link text-dark">Личный кабинет</a></li>
+            <li><a href="#" class="nav-link text-dark">Мои курсы</a></li>
+            <li><a href="#" class="nav-link text-dark">Контакты</a></li>
+          </ul>
+        </div>
+      </div>
+    </header>
+    <div class="title-containter d-flex">
+      <div class="d-flex">
+        <p class="subtitle mb-0">помощник на основе ИИ</p>
+        <p class="title mb-0">CodeCheck</p>
+      </div>
+    </div>
+    <div id='main-menu' class="">
+      <div id="sidebar" role="group" aria-label="sidebar buttons">
+        <div class="d-flex sidebar-pair">
+          <!--<div class="indicator" name="indicator"></div>-->
+          <button type="button" class="btn sidebar-button" data-toggle="button" aria-pressed="true">арбузы</button>
+        </div>
+        <div class="d-flex sidebar-pair">
+          <button type="button" class="btn sidebar-button" data-toggle="button" aria-pressed="true">вычислить</button>
+        </div>
+        <div class="d-flex sidebar-pair">
+          <button type="button" class="btn sidebar-button" data-toggle="button" aria-pressed="true">найти</button>
+        </div>
+      </div>
+      <div id="chat">
+
+      </div>
+      <div id="tests">
+        <div class="expert-dropup btn-group dropup d-flex">
+          <button id="export" class="btn dropdown-toggle roboto" data-bs-toggle="dropdown" aria-expanded="false"><span>export</span></button>
+          <ul class="dropdown-menu">
+            <li><span class="roboto">экспорт в lms</span></li>
+            <li><input type="text" class="form-control roboto" name="" id="" placeholder="название категории"></input></li>
+            <li><input type="text" class="form-control roboto" name="" id="" placeholder="задание"></input><button class="btn"><img src="images/send.svg"></button></li>
+          </ul>
+        </div>
+        <div class="test-box d-flex">
+          <input type="text" class="form-control roboto" name="" id="" placeholder="input"></input>
+          <output type="text" class="form-control roboto" name="" id="" placeholder="output"></output>
+          <div class="test-result roboto"><span>✔</span></div>
+        </div>
+        <div class="test-box d-flex">
+          <input type="text" class="form-control roboto" name="" id="" placeholder="input"></input>
+          <output type="text" class="form-control roboto" name="" id="" placeholder="output"></output>
+          <div class="test-result roboto"><span>✔</span></div>
+        </div>
+        <div class="test-box d-flex">
+          <input type="text" class="form-control roboto" name="" id="" placeholder="input"></input>
+          <output type="text" class="form-control roboto" name="" id="" placeholder="output"></output>
+          <div class="test-result roboto"><span>✔</span></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

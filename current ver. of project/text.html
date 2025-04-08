@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Compiler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        textarea {
+            width: 80%;
+            height: 150px;
+            font-size: 16px;
+        }
+        button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            width: 80%;
+            margin: auto;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h2>Python Compiler in Browser</h2>
+    <textarea id="code">print("Hello from Python!")</textarea><br>
+    <button onclick="runPython()">Run</button>
+    <h3>Output:</h3>
+    <pre id="output"></pre>
+
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.0/full/pyodide.js"></script>
+    <script>
+        async function runPython() {
+            let outputElement = document.getElementById("output");
+            outputElement.textContent = "Running...";
+            
+            try {
+                let pyodide = await loadPyodide();
+                let code = document.getElementById("code").value;
+                let result = pyodide.runPython(code);
+                outputElement.textContent = result;
+            } catch (error) {
+                outputElement.textContent = "Error: " + error;
+            }
+        }
+    </script>
+</body>
+</html>

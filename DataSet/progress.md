@@ -27,9 +27,10 @@ has_even
 has_odd_min
 ### 4
 has_both
-
-### 5-6
-Writed
+### 5
+has_three
+### 5
+sum_odd
 
 # ПЗ_7_ПиОА
 ## 5.1 - 5.2

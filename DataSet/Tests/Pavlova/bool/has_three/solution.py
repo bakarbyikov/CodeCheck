@@ -1,0 +1,1 @@
+print(any(i%3==0 for i in map(int, input())))

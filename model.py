@@ -7,7 +7,6 @@ from contexttimer import Timer
 from loguru import logger
 from tqdm import tqdm
 
-from misc import *
 from schema import Message, Test, TestsResponse
 from tester import Problem, ProblemSet, Report, Status
 
@@ -17,9 +16,10 @@ class Prompts:
     @staticmethod
     def solve(problem: str):
         return (
-            "Solve next problem using python."
-            "Don't use third party libraries."
-            "Don't add prompt in input."
+            "Solve this problem using python. "
+            "Don't use third party libraries. "
+            "Read values from stdin. "
+            "Write answer into stdout. "
             f"\n###\n{problem}\n###\n"
         )
 
@@ -40,7 +40,8 @@ class Model:
                               re.DOTALL)
     json_pattern = re.compile("```json([^`]*)", re.DOTALL)
 
-    def __init__(self):
+    def __init__(self, model="qwen2.5-coder:3b"):
+        self.model = model
         me = id(self)
         self.logger = logger.bind(model=me)
         logger.add(f"model.log", level="TRACE",
@@ -48,7 +49,7 @@ class Model:
 
     def message(self, messages: list[dict[str, str]]) -> str:
         response = ollama.chat(
-            "qwen2.5-coder:7b",
+            self.model,
             messages,
         )
         content = response.message.content
@@ -84,13 +85,25 @@ class Model:
             return list()
         return TestsResponse.model_validate_json(tests).tests
 
+    def gen(self, prompt: str) -> str:
+        args = dict(
+            model=self.model,
+            prompt=prompt,
+            options=dict(
+                seed=42
+            )
+        )
+        answer = ollama.generate(**args).response
+        self.logger.trace(f"\n{prompt}\n=>\n{answer}")
+        return answer
+
     def create_solution(self, problem: str) -> Optional[str]:
         prompt = Prompts.solve(problem)
-        return self.extract_code(self.ask(prompt))
+        return self.extract_code(self.gen(prompt))
 
     def create_tests(self, problem: str) -> list[Test]:
         prompt = Prompts.tests(problem)
-        return self.extract_tests(self.ask(prompt))
+        return self.extract_tests(self.gen(prompt))
 
     def chat(self, messages: list[Message]) -> Optional[str]:
         problem = messages[0].content
@@ -113,6 +126,6 @@ if __name__ == "__main__":
     problems = ProblemSet.from_folder("DataSet/Tests")
     to_test = list(problems.by_tag("Tests"))
 
-    model = Model(Qwen_7B_q2)
+    model = Model("qwen2.5-coder:3b")
     results = Report(map(model.test, tqdm(to_test, file=sys.stderr)))
     logger.info(results)

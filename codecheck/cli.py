@@ -3,8 +3,10 @@ from importlib import import_module
 import typer
 
 from codecheck.misc import enable_trace
+from codecheck.dataset.cli import app as dataset
 
 app = typer.Typer()
+app.add_typer(dataset, name="dataset")
 
 @app.command()
 def run(folder: str, file: str):

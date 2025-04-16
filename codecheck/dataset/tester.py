@@ -1,21 +1,23 @@
 from collections import Counter
-from csv import DictReader
+from csv import DictReader, DictWriter, writer
+import csv
 from enum import Enum, auto
 from functools import partial
 from itertools import chain
 from pathlib import Path
 from subprocess import PIPE, Popen
 from tempfile import NamedTemporaryFile
-from typing import Generator, Self
+from typing import Generator, Optional, Self
 
 from loguru import logger
 from pydantic.dataclasses import dataclass
 
-from ..misc import try_read
 
-
-class SolutionError(Exception):
-    pass
+def try_read(path: Path) -> str | None:
+    try:
+        return path.read_text()
+    except FileNotFoundError:
+        return None
 
 
 class Status(Enum):
@@ -56,7 +58,7 @@ class Report(Counter):
         names = "/".join(s.name for s in Status)
         values = "/".join(str(self[s]) for s in Status)
         return f"{names}: {values}"
-    
+
     def status(self) -> Status:
         return next(status for status in reversed(Status)
                     if self[status])
@@ -71,10 +73,18 @@ class Test:
     @classmethod
     def from_file(cls, path: Path) -> list[Self]:
         text = try_read(path)
-        # if not text:
-        #     return list()
+        if not text:
+            return None
         reader = DictReader(text.splitlines() or list())
         return [cls(i, **row) for i, row in enumerate(reader)]
+
+    @classmethod
+    def write(cls, tests: list[Self], path: Path):
+        with (path/"test.csv").open('w') as file:
+            writer = csv.writer(file)
+            writer.writerow(("input", "expected"))
+            writer.writerows(((test.input, test.expected)
+                            for test in tests))
 
     def run(self, solution: str) -> Result:
         with NamedTemporaryFile(mode='w') as script:
@@ -93,14 +103,14 @@ class Test:
 class Problem:
     name: str
     text: str
-    solution: str | None
-    tests: list[Test]
-    tags: set[str]
+    solution: Optional[str] = None
+    tests: Optional[list[Test]] = None
+    tags: Optional[set[str]] = None
 
     @classmethod
     def open(cls, path: Path) -> Self:
         name = try_read(path/"name.txt") or path.parts[-1]
-        
+
         text = try_read(path/"text.md")
         if not text:
             logger.warning(f"Can't find text in {path}")
@@ -117,6 +127,12 @@ class Problem:
         tags = path.parts
 
         return cls(name, text, solution, tests, tags)
+
+    @staticmethod
+    def create(path: Path, text: str):
+        path.mkdir()
+        with (path/"text.md").open('w') as file:
+            print(text, file=file)
 
     def check(self, solution: str) -> Status:
         logger.trace(f"Problem: {self.name}")
@@ -146,7 +162,7 @@ class ProblemSet:
             problem = Problem.open(root)
             if not problem:
                 continue
-            
+
             problems.append(problem)
         return cls(problems)
 
@@ -165,8 +181,3 @@ class ProblemSet:
 def main():
     problems = ProblemSet.from_folder()
     logger.info(problems.self_check())
-    
-    # logger.info(problems.tags())
-    # melons, *_=problems.by_tag("melons")
-    # solution="1/0"
-    # logger.info(melons.check(solution))

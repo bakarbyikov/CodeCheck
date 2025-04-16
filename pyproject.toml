@@ -17,3 +17,7 @@ version = "0.1.0"
 dev = [
     "ipykernel>=6.29.5",
 ]
+
+[project.scripts]
+cli = "codecheck.cli:main"
+serve = "codecheck.endpoint:main"

@@ -7,8 +7,8 @@ from contexttimer import Timer
 from loguru import logger
 from tqdm import tqdm
 
-from schema import Message, Test, TestsResponse
-from tester import Problem, ProblemSet, Report, Status
+from .schema import Message, Test, TestsResponse
+from .tester import Problem, ProblemSet, Report, Status
 
 
 class Prompts:
@@ -121,8 +121,7 @@ class Model:
             return Status.Error
         return problem.check(solution)
 
-
-if __name__ == "__main__":
+def main():
     problems = ProblemSet.from_folder("DataSet/Tests")
     to_test = list(problems.by_tag("Tests"))
 

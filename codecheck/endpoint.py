@@ -1,8 +1,8 @@
 import uvicorn
 from fastapi import FastAPI
 
-from model import Model
-from schema import (MessagesRequest, ProblemRequest,
+from .model import Model
+from .schema import (MessagesRequest, ProblemRequest,
                     SolutionResponse, TestsResponse)
 
 app = FastAPI()
@@ -26,5 +26,9 @@ def create_tests(request: ProblemRequest):
     return TestsResponse(tests=tests)
 
 
-if __name__ == "__main__":
+def main():
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+if __name__ == "__main__":
+    main

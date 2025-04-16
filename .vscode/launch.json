@@ -10,6 +10,8 @@
             "request": "launch",
             "module": "codecheck",
             "args": [
+                "run",
+                "${relativeFileDirname}",
                 "${fileBasenameNoExtension}",
             ]
         }

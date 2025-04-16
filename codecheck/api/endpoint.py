@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 
-from .model import Model
+from ..model.model import Model
 from .schema import (MessagesRequest, ProblemRequest,
                     SolutionResponse, TestsResponse)
 

@@ -11,7 +11,7 @@ from typing import Generator, Self
 from loguru import logger
 from pydantic.dataclasses import dataclass
 
-from .misc import try_read
+from ..misc import try_read
 
 
 class SolutionError(Exception):

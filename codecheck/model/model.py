@@ -7,8 +7,8 @@ from contexttimer import Timer
 from loguru import logger
 from tqdm import tqdm
 
-from .api.schema import Message, Test, TestsResponse
-from .dataset.tester import Problem, ProblemSet, Report, Status
+from ..api.schema import Message, Test, TestsResponse
+from ..dataset.tester import Problem, ProblemSet, Report, Status
 
 
 class Prompts:
@@ -120,6 +120,7 @@ class Model:
         if not solution:
             return Status.Error
         return problem.check(solution)
+
 
 def main():
     problems = ProblemSet.from_folder("DataSet/Tests")

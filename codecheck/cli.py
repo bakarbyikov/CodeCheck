@@ -2,6 +2,8 @@ from importlib import import_module
 
 import typer
 
+from codecheck.misc import enable_trace
+
 app = typer.Typer()
 
 @app.command()
@@ -16,4 +18,5 @@ def serve():
     endpoint.main()
 
 def main():
+    enable_trace()
     app()

@@ -20,4 +20,4 @@ dev = [
 
 [project.scripts]
 cli = "codecheck.cli:main"
-serve = "codecheck.endpoint:main"
+serve = "codecheck.api.endpoint:main"

@@ -1,3 +1,4 @@
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from fastapi import FastAPI
 
@@ -6,6 +7,23 @@ from .schema import (MessagesRequest, ProblemRequest,
                     SolutionResponse, TestsResponse)
 
 app = FastAPI()
+
+origins = [
+    "https://olegpepeg.ru:8081",
+    "http://olegpepeg.ru:8081",
+    "https://olegpepeg.ru:8080",
+    "http://olegpepeg.ru:8080",
+    
+    "http://127.0.0.1:5500",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.post("/chat")

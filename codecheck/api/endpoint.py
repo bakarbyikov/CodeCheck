@@ -1,18 +1,22 @@
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 
 from ..model.model import Model
 from .schema import (MessagesRequest, ProblemRequest,
                     SolutionResponse, TestsResponse)
 
-app = FastAPI()
+app = FastAPI(
+    root_path="/api"
+)
 
 origins = [
-    "https://olegpepeg.ru:8081",
-    "http://olegpepeg.ru:8081",
-    "https://olegpepeg.ru:8080",
-    "http://olegpepeg.ru:8080",
+    "https://olegpepeg.ru",
+    "http://olegpepeg.ru",
+    # "https://olegpepeg.ru:8081",
+    # "http://olegpepeg.ru:8081",
+    # "https://olegpepeg.ru:8080",
+    # "http://olegpepeg.ru:8080",
     
     "http://127.0.0.1:5500",
 ]

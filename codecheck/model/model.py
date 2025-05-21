@@ -5,10 +5,11 @@ from typing import Optional
 import ollama
 from contexttimer import Timer
 from loguru import logger
+from pydantic import ValidationError
 from tqdm import tqdm
 
 from ..api.schema import Message, Test, TestsResponse
-from ..dataset.tester import Problem, ProblemSet, Report, Status
+from ..dataset.problems import Problem, ProblemSet, Report, Status
 
 
 class Prompts:
@@ -30,8 +31,7 @@ class Prompts:
             f"\n###\n{problem}\n###\n"
             "Use JSON schema:\n"
             "Testcase = {'input': str, 'expected': str}\n"
-            "Result = {'tests': List[Testcase]}\n"
-            "Return: Result"
+            "Return: {'tests': List[Testcase]}\n"
         )
 
 
@@ -47,20 +47,25 @@ class Model:
         logger.add(f"model.log", level="TRACE",
                    filter=lambda record: record["extra"].get("model") == me)
 
-    def message(self, messages: list[dict[str, str]]) -> str:
+    def message(self, messages: list[Message]) -> str:
         response = ollama.chat(
             self.model,
-            messages,
+            [m.model_dump() for m in messages],
         )
-        content = response.message.content
+        content = response.message.content or ""
         self.logger.trace(f"\n{messages}\n=>\n{content}")
         return content
 
     def ask(self, text: str) -> str:
         messages = [
-            {"role": "system",
-             "content": "You are an expert AI coding assistant."},
-            {"role": "user", "content": text}
+            Message(
+                role='system',
+                content='You are an expert AI coding assistant.',
+            ),
+            Message(
+                role='user',
+                content=text,
+            ),
         ]
         return self.message(messages)
 
@@ -83,17 +88,17 @@ class Model:
                  or self.extract_code(text))
         if not tests:
             return list()
-        return TestsResponse.model_validate_json(tests).tests
+        try:
+            return TestsResponse.model_validate_json(tests).tests
+        except ValidationError:
+            return list()
 
     def gen(self, prompt: str) -> str:
-        args = dict(
+        answer = ollama.generate(
             model=self.model,
             prompt=prompt,
-            options=dict(
-                seed=42
-            )
-        )
-        answer = ollama.generate(**args).response
+            options=dict(seed=42)
+        ).response
         self.logger.trace(f"\n{prompt}\n=>\n{answer}")
         return answer
 
@@ -126,6 +131,6 @@ def main():
     problems = ProblemSet.from_folder("DataSet/Tests")
     to_test = list(problems.by_tag("Tests"))
 
-    model = Model("qwen2.5-coder:3b")
+    model = Model("qwen2.5-coder:14b")
     results = Report(map(model.test, tqdm(to_test, file=sys.stderr)))
     logger.info(results)

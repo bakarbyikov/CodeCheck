@@ -1,10 +1,12 @@
-from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-from fastapi import APIRouter, FastAPI
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from codecheck.dataset.tester import Result, test
 
 from ..model.model import Model
-from .schema import (MessagesRequest, ProblemRequest,
-                    SolutionResponse, TestsResponse)
+from .schema import (MessagesRequest, ProblemRequest, Solution,
+                     SolutionResponse, TestsResponse)
 
 app = FastAPI(
     root_path="/api"
@@ -13,11 +15,7 @@ app = FastAPI(
 origins = [
     "https://olegpepeg.ru",
     "http://olegpepeg.ru",
-    # "https://olegpepeg.ru:8081",
-    # "http://olegpepeg.ru:8081",
-    # "https://olegpepeg.ru:8080",
-    # "http://olegpepeg.ru:8080",
-    
+
     "http://127.0.0.1:5500",
 ]
 
@@ -31,21 +29,26 @@ app.add_middleware(
 
 
 @app.post("/chat")
-def chat(request: MessagesRequest):
+def chat(request: MessagesRequest) -> SolutionResponse:
     solution = Model().chat(request.messages)
     return SolutionResponse(solution=solution)
 
 
 @app.post("/create_solution")
-def create_solution(request: ProblemRequest):
+def create_solution(request: ProblemRequest) -> SolutionResponse:
     solution = Model().create_solution(request.problem)
     return SolutionResponse(solution=solution)
 
 
 @app.post("/create_tests")
-def create_tests(request: ProblemRequest):
+def create_tests(request: ProblemRequest) -> TestsResponse:
     tests = Model().create_tests(request.problem)
     return TestsResponse(tests=tests)
+
+
+@app.post("/test_solution")
+def test_solution(request: Solution) -> list[Result]:
+    return test(request.solution, request.tests)
 
 
 def main():
@@ -53,4 +56,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main
+    main()

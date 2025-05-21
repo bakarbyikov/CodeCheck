@@ -1,82 +1,28 @@
-from collections import Counter
-from csv import DictReader, DictWriter, writer
 import csv
-from enum import Enum, auto
-from functools import partial
-from itertools import chain
+from csv import DictReader
+from enum import Enum
 from pathlib import Path
-from subprocess import PIPE, Popen
+from subprocess import PIPE, Popen, TimeoutExpired
 from tempfile import NamedTemporaryFile
-from typing import Generator, Optional, Self
+from typing import Self
 
+from contexttimer import Timer
 from loguru import logger
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
 
 
-def try_read(path: Path) -> str | None:
-    try:
-        return path.read_text()
-    except FileNotFoundError:
-        return None
-
-
-class Status(Enum):
-    Passed = auto()
-    Failed = auto()
-    Error = auto()
-
-
-@dataclass
-class Result:
-    status: Status
-    expected: str
-    got: str
-    error: str
-
-    @classmethod
-    def from_inputs(cls, expected: str, got: str, error: str) -> Self:
-        if error:
-            status = Status.Error
-        elif got != expected:
-            status = Status.Failed
-        else:
-            status = Status.Passed
-        return cls(status, expected, got, error)
-
-    def __str__(self):
-        match self.status:
-            case Status.Passed:
-                return f"passed"
-            case Status.Failed:
-                return f"failed expected: {self.expected}, got: {self.got}"
-            case Status.Error:
-                return f"error:\n{self.error}"
-
-
-class Report(Counter):
-    def __str__(self):
-        names = "/".join(s.name for s in Status)
-        values = "/".join(str(self[s]) for s in Status)
-        return f"{names}: {values}"
-
-    def status(self) -> Status:
-        return next(status for status in reversed(Status)
-                    if self[status])
-
-
-@dataclass
-class Test:
-    index: int
+class Test(BaseModel):
     input: str
     expected: str
 
     @classmethod
-    def from_file(cls, path: Path) -> list[Self]:
-        text = try_read(path)
-        if not text:
-            return None
+    def read(cls, path: Path) -> list[Self]:
+        try:
+            text = path.read_text()
+        except FileNotFoundError:
+            return list()
         reader = DictReader(text.splitlines() or list())
-        return [cls(i, **row) for i, row in enumerate(reader)]
+        return [cls.model_validate(row) for row in reader]
 
     @classmethod
     def write(cls, tests: list[Self], path: Path):
@@ -84,100 +30,55 @@ class Test:
             writer = csv.writer(file)
             writer.writerow(("input", "expected"))
             writer.writerows(((test.input, test.expected)
-                            for test in tests))
+                              for test in tests))
 
-    def run(self, solution: str) -> Result:
+
+class Status(Enum):
+    Passed = 'Passed'
+    Failed = 'Failed'
+    Error = 'Error'
+
+
+class Result(BaseModel):
+    status: Status
+    message: str
+
+    @classmethod
+    def error(cls, error: str) -> Self:
+        return cls(status=Status.Error, message=f"Error:\n{error}")
+
+    @classmethod
+    def failed(cls, expected: str, got: str) -> Self:
+        return cls(status=Status.Failed, message=f"Fail: {expected=} {got=}")
+
+    @classmethod
+    def passed(cls) -> Self:
+        return cls(status=Status.Passed, message=f"OK!")
+
+
+def test(solution: str, tests: list[Test]) -> list[Result]:
+    with Timer(output=logger.trace, fmt="Tested in {:.3f} seconds"):
         with NamedTemporaryFile(mode='w') as script:
             print(solution, file=script, flush=True)
-
-            child = Popen(['python3', script.name],
-                          stdin=PIPE, stdout=PIPE, stderr=PIPE,
-                          text=True, )
-            got, error = map(str.strip, child.communicate(self.input))
-        result = Result.from_inputs(self.expected, got, error)
-        logger.trace(f"Test #{self.index} {result}")
-        return result
+            return [
+                run(script.name, test)
+                for test in tests
+            ]
 
 
-@dataclass
-class Problem:
-    name: str
-    text: str
-    solution: Optional[str] = None
-    tests: Optional[list[Test]] = None
-    tags: Optional[set[str]] = None
-
-    @classmethod
-    def open(cls, path: Path) -> Self:
-        name = try_read(path/"name.txt") or path.parts[-1]
-
-        text = try_read(path/"text.md")
-        if not text:
-            logger.warning(f"Can't find text in {path}")
-            return None
-
-        solution = try_read(path/"solution.py")
-        if not solution:
-            logger.warning(f"Can't find solution in {path}")
-
-        tests = Test.from_file(path/"test.csv")
-        if not tests:
-            logger.warning(f"Can't find tests in {path}")
-
-        tags = path.parts
-
-        return cls(name, text, solution, tests, tags)
-
-    @staticmethod
-    def create(path: Path, text: str):
-        path.mkdir()
-        with (path/"text.md").open('w') as file:
-            print(text, file=file)
-
-    def check(self, solution: str) -> Status:
-        logger.trace(f"Problem: {self.name}")
-        result = Report(test.run(solution).status
-                        for test in self.tests)
-        logger.trace(result)
-        return result.status()
-
-    def self_check(self) -> Status:
-        return self.check(self.solution)
-
-    def has_tag(self, tag: str) -> bool:
-        return tag in self.tags
-
-
-@dataclass
-class ProblemSet:
-    problems: list[Problem]
-
-    @classmethod
-    def from_folder(cls, folder: str = "DataSet/Tests"):
-        problems = list()
-        for root, dirs, files in Path(folder).walk():
-            if not files:
-                continue
-
-            problem = Problem.open(root)
-            if not problem:
-                continue
-
-            problems.append(problem)
-        return cls(problems)
-
-    def self_check(self) -> Report:
-        result = Report(map(Problem.self_check, self.problems))
-        logger.trace(f"ProblemSet selftest: {result}")
-        return result
-
-    def by_tag(self, tag: str) -> Generator[Problem, None, None]:
-        yield from filter(partial(Problem.has_tag, tag=tag), self.problems)
-
-    def tags(self) -> dict[str, int]:
-        return Counter(chain.from_iterable(problem.tags for problem in self.problems))
-
-
-def main():
-    problems = ProblemSet.from_folder()
-    logger.info(problems.self_check())
+def run(script: str, test: Test) -> Result:
+    child = Popen(
+        ['python3', script],
+        stdin=PIPE, stdout=PIPE, stderr=PIPE,
+        text=True,
+    )
+    try:
+        got, error = map(str.strip, child.communicate(test.input, 10))
+    except TimeoutExpired:
+        child.kill()
+        return Result.error("TimeOut")
+    if error:
+        return Result.error(error)
+    if got != test.expected:
+        return Result.failed(test.expected, got)
+    return Result.passed()

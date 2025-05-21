@@ -4,7 +4,7 @@ import typer
 from typing_extensions import Annotated
 
 from codecheck.model.model import Model
-from codecheck.dataset.tester import Problem, Test
+from codecheck.dataset.problems import Problem, Test
 
 app = typer.Typer()
 
@@ -25,7 +25,7 @@ def solve(
         resolve_path=True,
     )],
 ):
-    problem = Problem.open(path)
+    problem = Problem.read(path)
     solution = Model().create_solution(problem.text)
     logger.info(solution)
     (path/"solution.py").write_text(solution)
@@ -37,7 +37,7 @@ def audit(
         resolve_path=True,
     )],
 ):
-    problem = Problem.open(path)
+    problem = Problem.read(path)
     tests = Model().create_tests(problem.text)
     logger.info(*tests, sep='\n')
     Test.write(tests, path)
@@ -49,7 +49,7 @@ def check(
         resolve_path=True,
     )],
 ):
-    problem = Problem.open(path)
+    problem = Problem.read(path)
     logger.info(problem.self_check())
 
 def main():

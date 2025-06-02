@@ -7,7 +7,7 @@
     <link rel="shortcut icon" type="image/ico" href="images/favicon.ico">
     <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet/less" type="text/css" href="test.less"/>
+    <link rel="stylesheet/less" type="text/css" href="style.less"/>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
@@ -17,6 +17,32 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
   </head>
   <body>
+            <!-- contextmenu's -->
+        <!-- contextmenu для тестов -->
+    <div class="hidden contextmenu" id="contextmenu">
+      <div class='btn-grad' id="detele-test">
+        <img src="images/trash-bin.svg">
+        <div type='button' class="roboto"><span>удалить тест</span></div>
+      </div>
+    </div>
+
+        <!-- contextmenu для решений -->
+    <div class="hidden contextmenu" id="contextmenu-selected-solution">
+      <div id="select-solution">
+        <img src="images/bookmark.svg">
+        <div type='button' class="roboto"><span>Сделать выбранным решением</span></div>
+      </div>
+    </div>
+
+        <!-- contextmenu для вкладок -->
+    <div class="hidden" id="contextmenu-tabs">
+      <input type='text' class='' id='tab-name' autocomplete="off" onkeypress="input_tab_name(event)"/>
+      <div id="tab-change-name">
+        <img src="images/pencil-svgrepo-com.svg">
+        <div type='button' class="roboto"><span>Редактировать название</span></div>
+      </div>
+    </div>
+
     <header class="border-bottom">
       <div class="container-fluid">
         <div class="nav d-flex align-items-center justify-content-lg-start">
@@ -42,27 +68,14 @@
     </div>
     <div id='main-menu' class="">
       <div id="sidebar" role="group" aria-label="sidebar buttons">
-        <div class="d-flex sidebar-pair">
-          <!--<div class="indicator" name="indicator"></div>-->
-          <button type="button" class="btn sidebar-button" data-toggle="button" aria-pressed="true">арбузы</button>
-        </div>
-        <div class="d-flex sidebar-pair">
-          <button type="button" class="btn sidebar-button" data-toggle="button" aria-pressed="true">вычислить</button>
-        </div>
-        <div class="d-flex sidebar-pair">
-          <button type="button" class="btn sidebar-button" data-toggle="button" aria-pressed="true">найти</button>
-        </div>
         <button id="add-tab" class="btn roboto d-flex"><span>+</span></button>
       </div>
       <div class="chat-container ">
         <form id="chat-form">
           <div id="chat">
-            <div class="chat chat-bot">
-              <p>Здравствуйте! Что нужно решить для вас сегодня?</p>
-            </div>
           </div>
           <div class="sending">
-            <textarea id="chatInput" class='chatInput' cols='10' rows='1' placeholder="Ask me anything..." onkeypress="my_function(event)"></textarea>
+            <textarea id="chatInput" class='chatInput' cols='10' rows='1' placeholder="Ask me anything..." onkeypress="textarea_input(event)"></textarea>
             <input type="button" id="submit" class="submit" value="отправить" />
           </div>
         </form>
@@ -72,8 +85,8 @@
           <button id="export" class="btn dropdown-toggle roboto" data-bs-toggle="dropdown" aria-expanded="false"><span>export</span></button>
           <ul class="dropdown-menu">
             <li><span class="roboto">экспорт в lms</span></li>
-            <li><input id='category' type="text" class="form-control roboto" name="" id="" placeholder="название категории"></input></li>
-            <li><input id='exercise' type="text" class="form-control roboto" name="" id="" placeholder="задание"></input><button class="btn"><img src="images/send.svg"></button></li>
+            <li><input id='category' type="text" class="form-control roboto" name="" id="" placeholder="название категории" /></li>
+            <li><input id='exercise' type="text" class="form-control roboto" name="" id="" placeholder="задание" /><button class="btn"><img src="images/send.svg"></button></li>
           </ul>
         </div>
         <div id="test-list">
@@ -83,7 +96,7 @@
     </div>
     <script src="js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="js/main_v2.js"></script>
+    <script src="js/main.js"></script>
     <script src="js/test.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/less" ></script>
     <script src="js/highlight.min.js"></script>

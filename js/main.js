@@ -6,6 +6,9 @@ const add_test = document.getElementById('add-test');
 const test_list = document.getElementById('test-list');
 const add_tab = document.getElementById('add-tab');
 const side_bar = document.getElementById('sidebar');
+var tabs_storage = {
+
+};
 
 //позволяет делать спуск в поле текста на shift+enter
 function textarea_input(event) 
@@ -70,7 +73,22 @@ function create_tab(label = "Новая вкладка") {
   tab_new_el = new tab(label);
   tab_el.innerHTML = tab_new_el.return_html();
 
-  sessionStorage.setItem(label, JSON.stringify({messages : ['<div class="chat chat-bot"><p>Здравствуйте! Что нужно решить для вас сегодня?</p></div>'], tests : []}));
+  // стартовое сообщение
+  let start_message = document.createElement(`div`);
+  start_message.classList.add('chat', 'chat-bot');
+
+  let start_span = document.createElement(`span`);
+  start_span.textContent = 'Здравствуйте! Что нужно решить для вас сегодня?';
+  
+  start_message.appendChild(start_span);
+
+  tabs_storage[label] = {
+    messages : [start_message],
+    tests: []
+  };
+
+  // sessionStorage.setItem(label, {messages : [start_message], 
+  //                                tests : []});
   //console.log(label);
 
   // моё contextmenu с функцией удаление вкладки
@@ -110,35 +128,23 @@ function create_tab(label = "Новая вкладка") {
     $('.sidebar-pair').removeClass('active-tab');
     
     tab_el.classList.add('active-tab');
-    let stored_info = JSON.parse(sessionStorage.getItem(document.getElementsByClassName('active-tab')[0].firstChild.firstChild.textContent));
+    let stored_info = tabs_storage[document.getElementsByClassName('active-tab')[0].firstChild.firstChild.textContent];
 
-    chat_body.innerHTML = "";
-
-    let full_tests = '';
-    let full_message = '';
-
-    // сделать добавление тестов !!!!!!!
+    // добавление тестов
+    // console.log(stored_info.messages);
     if (stored_info.tests.length > 0) {
-      for (let i = 0; i < stored_info.tests.length; i++){
-        full_tests += stored_info.tests[i];
+      for (let i = 0; i < stored_info.tests.length; i++) {
+        test_list.appendChild(stored_info.tests[i]);
+      }
+    }
+    if (stored_info.messages.length > 0) {
+      for (let i = 0; i < stored_info.messages.length; i++) {
+        chat_body.appendChild(stored_info.messages[i]);
       }
     }
 
-    for (let i = 0; i < stored_info.messages.length; i++){
-      full_message += stored_info.messages[i];
-    }
-
-    // console.log(full_message);
-    // console.log(full_tests);
-    chat_body.innerHTML = full_message;
-    test_list.innerHTML = full_tests;
+    
     test_list.appendChild(add_test);
-    // var message = document.createElement('div');
-    // message.innerHTML = stored_messages;
-    // console.log(message);
-    // message = message.childNodes;
-    // console.log(message);
-    //chat_body.appendChild(message);
   });
 
   side_bar.insertBefore(tab_el, add_tab);
@@ -159,12 +165,17 @@ $('#tab-change-name').click(function(event) {
   }
 
   // изменяет ключ(название вкладки) в sessionStorage на новое
-  let stored_messages = sessionStorage.getItem(tab_to_change_name.firstChild.firstChild.textContent);
-  sessionStorage.setItem(new_tab_name.value, stored_messages);
+
+  // let stored_messages = sessionStorage.getItem(tab_to_change_name.firstChild.firstChild.textContent);
+  // sessionStorage.setItem(new_tab_name.value, stored_messages);
+
+  let stored_info = tabs_storage[tab_to_change_name.firstChild.firstChild.textContent];
+  tabs_storage[new_tab_name.value] = stored_info;
 
   if (tab_to_change_name.firstChild.firstChild.textContent != "Новая вкладка") {
-    sessionStorage.removeItem(tab_to_change_name.firstChild.firstChild.textContent);
+    delete tabs_storage[tab_to_change_name.firstChild.firstChild.textContent];
   }
+
   // console.log(new_tab_name.value);
   // console.log(sessionStorage.getItem(new_tab_name.value));
   // console.log('все, что есть в sessionStorage');
@@ -175,7 +186,8 @@ $('#tab-change-name').click(function(event) {
   // }
   // console.log('konec');
 
-  tab_to_change_name.innerHTML = `<button type="button" class="btn sidebar-button" data-toggle="button" aria-pressed="true"><span>${new_tab_name.value}</span></button>`;
+  tab_to_change_name.firstChild.firstChild.textContent = new_tab_name.value;
+  //tab_to_change_name.innerHTML = `<button type="button" class="btn sidebar-button" data-toggle="button" aria-pressed="true"><span>${new_tab_name.value}</span></button>`;
 });
 
 //оформление полученного сообщения message в html документе
@@ -249,13 +261,12 @@ function manage_chat() {
 
   //chat_body.appendChild(message_el(user_message, "user"));
   var current_active_tab = document.getElementsByClassName('active-tab')[0].firstChild.firstChild.textContent;
-  let stored_info = sessionStorage.getItem(current_active_tab);
+  let stored_info = tabs_storage[current_active_tab];
   
   // сохранение отправленного сообщения пользователя в sessionStorage к текущей открытой вкладке
   if (stored_info) {
-    let parsed_info = JSON.parse(stored_info);
-    parsed_info.messages.push(message_el(user_message, "user").outerHTML);
-    sessionStorage.setItem(current_active_tab, JSON.stringify(parsed_info));
+    stored_info.messages.push(message_el(user_message, "user"));
+    tabs_storage[current_active_tab] = stored_info;
     //console.log(sessionStorage.getItem(current_active_tab));
   }
 
@@ -278,12 +289,11 @@ function manage_chat() {
       //chat_body.appendChild(message_el(solution, "chat-bot"));
 
       // сохранение полученного сообщения в sessionStorage к текущей открытой вкладке
-      let stored_info = sessionStorage.getItem(current_active_tab);
+      let stored_info = tabs_storage[current_active_tab];
 
       if (stored_info) {
-        let parsed_info = JSON.parse(stored_info);
-        parsed_info.messages.push(message_el(solution, "chat-bot").outerHTML);
-        sessionStorage.setItem(current_active_tab, JSON.stringify(parsed_info));
+        stored_info.messages.push(message_el(solution, "chat-bot"));
+        tabs_storage[current_active_tab] = stored_info;
       }
 
       document.getElementsByClassName('active-tab')[0].click();
@@ -298,12 +308,11 @@ function manage_chat() {
         success: function (data) {
           for (let i = 0; i < data.tests.length; i++) {
             // сохранение полученного сообщения в sessionStorage к текущей открытой вкладке
-            let stored_info = sessionStorage.getItem(current_active_tab);
+            let stored_info = tabs_storage[current_active_tab];
 
             if (stored_info) {
-              let parsed_info = JSON.parse(stored_info);
-              parsed_info.tests.push(create_test(input = data.tests[i].input, output = data.tests[i].expected, solution = solution).outerHTML);
-              sessionStorage.setItem(current_active_tab, JSON.stringify(parsed_info))
+              stored_info.tests.push(create_test(input = data.tests[i].input, output = data.tests[i].expected, solution = solution));
+              tabs_storage[current_active_tab] = stored_info;
             }
           }
           document.getElementsByClassName('active-tab')[0].click();
@@ -412,6 +421,8 @@ function create_test(input = '', output = '', solution = '') {
     document.getElementById('contextmenu').className = "shown contextmenu";
     document.getElementById('contextmenu').style.top = y + 'px';
     document.getElementById('contextmenu').style.left = x + 'px';
+    
+    return test_el;
   });
 
   //помещает текст внутри input'ов внутрь их value
@@ -433,7 +444,9 @@ function create_test(input = '', output = '', solution = '') {
 // тот же main.js, но с использованием библиотеки jQuery
 // скрипт будет запущен тогда, когда прогрузится HTML страница с стилями 
 $(document).ready(function(){
+  // очистка sessionStorage
   sessionStorage.clear();
+
   // создание начальной вкладки
   create_tab();
   let start_tab = document.getElementsByClassName('sidebar-pair')[0];
@@ -444,7 +457,15 @@ $(document).ready(function(){
   });
   
   $('#add-test').click(function() {
-    create_test();
+    let current_active_tab = document.getElementsByClassName('active-tab')[0].firstChild.firstChild.textContent;
+    let stored_info = tabs_storage[current_active_tab];
+
+    if (stored_info) {
+      stored_info.tests.push(create_test());
+      tabs_storage[current_active_tab] = stored_info;
+    }
+
+    document.getElementsByClassName('active-tab')[0].click();
   });
   
   $('#add-tab').click(function() {

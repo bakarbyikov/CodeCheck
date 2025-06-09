@@ -330,42 +330,30 @@ function create_test(input = '', output = '') {
           console.log('input/output/solution is empty!');
           result.innerHTML = "!";
           console.log(input, output, solution);
+          return
         }
-
+    
+    test(solution, input, output).then(
+      function (data) {
+        console.log(`result: ${JSON.stringify(data)}`)
+        if (data.status == "Passed") {
+          result.innerHTML = `<span>+</span>`;
+          result.classList.add(`passed`);
+        }
+        else if (data.status == "Failed") {
+          result.innerHTML = `<span>-</span>`;
+          result.classList.add('failed');
+        }
         else {
-          $.ajax({
-          type: "POST",
-          contentType: "application/json; charset=utf-8",
-          url: "https://olegpepeg.ru/api/test_solution",
-          data: JSON.stringify({
-            "solution": `${solution}`,
-            "tests": [
-              {
-                "input": `${event.target.parentNode.children[0].value}`,
-                "expected": `${event.target.parentNode.children[1].value}`
-              }
-            ]
-          }),
-          success: function (data) {
-            if (data[0].status == "Passed") {
-              result.innerHTML = `<span>+</span>`;
-              result.classList.add(`passed`);
-            }
-            else if (data[0].status == "Failed"){
-              result.innerHTML = `<span>-</span>`;
-              result.classList.add('failed');
-            }
-            else {
-              result.innerHTML = `<span>!</span>`;
-              result.classList.add('error');
-              console.log(data[0].message);
-              console.log(solution);
-            }
-          }
-        })
+          result.innerHTML = `<span>!</span>`;
+          result.classList.add('error');
+          console.log(data.message);
+          console.log(solution);
+        }
       }
-      }
-    );
+    )
+    }
+  );
   
   inner_html = `<input type="text" class="input form-control roboto d-flex" placeholder="input" value="${input}" /><input type="text" class="output form-control roboto d-flex" placeholder="output" value="${output}" />`;
   test_el.innerHTML = inner_html;

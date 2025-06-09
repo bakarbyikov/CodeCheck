@@ -42,7 +42,9 @@ httpcore==1.0.7
 httptools==0.6.4
     # via uvicorn
 httpx==0.28.1
-    # via fastapi
+    # via
+    #   fastapi
+    #   ollama
 huggingface-hub==0.29.3
     # via codecheck (pyproject.toml)
 idna==3.10
@@ -61,12 +63,15 @@ markupsafe==3.0.2
     # via jinja2
 mdurl==0.1.2
     # via markdown-it-py
+ollama==0.4.8
+    # via codecheck (pyproject.toml)
 packaging==24.2
     # via huggingface-hub
 pydantic==2.10.6
     # via
     #   codecheck (pyproject.toml)
     #   fastapi
+    #   ollama
 pydantic-core==2.27.2
     # via pydantic
 pygments==2.19.1

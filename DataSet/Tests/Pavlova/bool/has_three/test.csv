@@ -1,0 +1,11 @@
+input,expected
+1234,True
+5678,True
+3333,True
+4567,True
+7890,True
+1111,False
+2222,False
+9876,True
+1357,True
+2468,True

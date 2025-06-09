@@ -31,65 +31,26 @@ function input_tab_name(event)
   };
 }
 
-// класс для вкладок
-class tab {
-  constructor (name) {
-    this.name = name
-    this.messages = { 
-      user : [],
-      bot : []
-    }
-    this.tests = {
-      input: [],
-      expected: [],
-      result: []
-    }
-  }
+// объявление стартового сообщения
+let start_message = document.createElement(`div`);
+start_message.classList.add('chat', 'chat-bot');
 
-  // добавление сообщений к вкладке
-  add_message(whom, message) {
-    this.messages[whom].push(message);
-  }
+let start_span = document.createElement(`span`);
+start_span.textContent = 'Здравствуйте! Что нужно решить для вас сегодня?';
 
-  // добавление тестов
-  add_tests(input, expected, result) {
-    this.tests[input].push(input)
-    this.tests[expected].push(expected)
-    this.tests[result].push(result)
-  }
-  
-  // возвращает оформленную вкладку
-  return_html() {
-    let html = `<button type="button" class="btn sidebar-button" data-toggle="button" aria-pressed="true"><span>${this.name}</span></button>`;
-    return html;
-  }
-}
+start_message.appendChild(start_span);
+
+tabs_storage["Новая вкладка"] = {
+  messages : [start_message],
+  tests : []
+};
 
 // функция, создающая пустую вкладку
 function create_tab(label = "Новая вкладка") {
   var tab_el = document.createElement(`div`);
   tab_el.classList.add(`d-flex`, `sidebar-pair`);
 
-  tab_new_el = new tab(label);
-  tab_el.innerHTML = tab_new_el.return_html();
-
-  // стартовое сообщение
-  let start_message = document.createElement(`div`);
-  start_message.classList.add('chat', 'chat-bot');
-
-  let start_span = document.createElement(`span`);
-  start_span.textContent = 'Здравствуйте! Что нужно решить для вас сегодня?';
-  
-  start_message.appendChild(start_span);
-
-  tabs_storage[label] = {
-    messages : [start_message],
-    tests: []
-  };
-
-  // sessionStorage.setItem(label, {messages : [start_message], 
-  //                                tests : []});
-  //console.log(label);
+  tab_el.innerHTML = `<button type="button" class="btn sidebar-button" data-toggle="button" aria-pressed="true"><span>${label}</span></button>`;
 
   // моё contextmenu с функцией удаление вкладки
   tab_el.addEventListener('contextmenu', function(event) {
@@ -129,20 +90,22 @@ function create_tab(label = "Новая вкладка") {
     
     tab_el.classList.add('active-tab');
     let stored_info = tabs_storage[document.getElementsByClassName('active-tab')[0].firstChild.firstChild.textContent];
+    
+    chat_body.innerHTML = '';
+    test_list.innerHTML = '';
 
-    // добавление тестов
-    // console.log(stored_info.messages);
+    // вывод сообщений и тестов
     if (stored_info.tests.length > 0) {
-      for (let i = 0; i < stored_info.tests.length; i++) {
+      for (let i = 0; i <= stored_info.tests.length - 1; i++) {
         test_list.appendChild(stored_info.tests[i]);
-      }
-    }
-    if (stored_info.messages.length > 0) {
-      for (let i = 0; i < stored_info.messages.length; i++) {
-        chat_body.appendChild(stored_info.messages[i]);
-      }
-    }
+      };
+    };
 
+    if (stored_info.messages.length > 0) {
+      for (let i = 0; i <= stored_info.messages.length - 1; i++) {
+        chat_body.appendChild(stored_info.messages[i]);
+      };
+    };
     
     test_list.appendChild(add_test);
   });
@@ -154,44 +117,49 @@ function create_tab(label = "Новая вкладка") {
 $('#tab-change-name').click(function(event) {
   let new_tab_name = document.getElementById("tab-name");
   let tab_to_change_name = document.getElementsByClassName('selected-tab')[0];
-  let old_name = tab_to_change_name.firstChild.firstChild.textContent;
   let all_tabs = document.getElementsByClassName('sidebar-pair');
 
   // предупреждение насчёт вкладок с одинаковыми названиями
-  for (let i = 0; i < all_tabs.length; i++) {
+  let checkNames = false;
+  for (let i = 0; i < all_tabs.length - 1; i++) {
     if (new_tab_name.value == all_tabs[i].firstChild.firstChild.textContent) {
-      console.log('Предупреждение : вкладки с одинаковыми именами хранят общие сообщения и тесты!');
+      checkNames = true;
     }
+  };
+  if (checkNames) {
+    console.log('Предупреждение : вкладки с одинаковыми именами хранят общие сообщения и тесты!');
+    return;
   }
 
   // изменяет ключ(название вкладки) в sessionStorage на новое
-
-  // let stored_messages = sessionStorage.getItem(tab_to_change_name.firstChild.firstChild.textContent);
-  // sessionStorage.setItem(new_tab_name.value, stored_messages);
-
   let stored_info = tabs_storage[tab_to_change_name.firstChild.firstChild.textContent];
   tabs_storage[new_tab_name.value] = stored_info;
 
   if (tab_to_change_name.firstChild.firstChild.textContent != "Новая вкладка") {
     delete tabs_storage[tab_to_change_name.firstChild.firstChild.textContent];
-  }
+    console.log(`deleted ${tab_to_change_name.firstChild.firstChild.textContent} from tabs_storage`);
+  } else {
+    // объявление стартового сообщения
+    let start_message = document.createElement(`div`);
+    start_message.classList.add('chat', 'chat-bot');
 
-  // console.log(new_tab_name.value);
-  // console.log(sessionStorage.getItem(new_tab_name.value));
-  // console.log('все, что есть в sessionStorage');
-  // for (let i = 0; i < sessionStorage.length; i++) {
-  //   let key = sessionStorage.key(i);
-  //   console.log(`ключ: ${key}`)
-  //   console.log(sessionStorage.getItem(key));
-  // }
-  // console.log('konec');
+    let start_span = document.createElement(`span`);
+    start_span.textContent = 'Здравствуйте! Что нужно решить для вас сегодня?';
 
+    start_message.appendChild(start_span);
+
+    tabs_storage["Новая вкладка"] = {
+      messages : [start_message],
+      tests : []
+    };
+  };
+
+  console.log(tabs_storage);
   tab_to_change_name.firstChild.firstChild.textContent = new_tab_name.value;
-  //tab_to_change_name.innerHTML = `<button type="button" class="btn sidebar-button" data-toggle="button" aria-pressed="true"><span>${new_tab_name.value}</span></button>`;
 });
 
 //оформление полученного сообщения message в html документе
-const message_el = (message, class_name) => {
+function message_el (message, class_name) {
     var chat_el = document.createElement(`div`);
     chat_el.classList.add(`chat`, `${class_name}`);
     let chat_content;    
@@ -259,18 +227,18 @@ function manage_chat() {
 
   textarea.value = "";
 
-  //chat_body.appendChild(message_el(user_message, "user"));
   var current_active_tab = document.getElementsByClassName('active-tab')[0].firstChild.firstChild.textContent;
-  let stored_info = tabs_storage[current_active_tab];
+  var stored_info = tabs_storage[current_active_tab];
   
-  // сохранение отправленного сообщения пользователя в sessionStorage к текущей открытой вкладке
+  // сохранение отправленного сообщения пользователя в tabs_storage к текущей открытой вкладке
   if (stored_info) {
     stored_info.messages.push(message_el(user_message, "user"));
     tabs_storage[current_active_tab] = stored_info;
-    //console.log(sessionStorage.getItem(current_active_tab));
   }
 
-  //console.log(stored_messages);
+  //console.log(tabs_storage);
+
+  var countOfMessages = document.getElementsByClassName('chat chat-bot').length;
 
   $.ajax({
     type: "POST",
@@ -286,13 +254,17 @@ function manage_chat() {
     }),
     success: function (data) {
       var solution = data.solution;
-      //chat_body.appendChild(message_el(solution, "chat-bot"));
+      var botMessage = message_el(solution, "chat-bot");
 
-      // сохранение полученного сообщения в sessionStorage к текущей открытой вкладке
-      let stored_info = tabs_storage[current_active_tab];
+      // сохранение полученного сообщения в tab_storage к текущей открытой вкладке
+      var stored_info = tabs_storage[current_active_tab];
+
+      if (countOfMessages == 1) {
+        botMessage.classList.add('selected-solution');
+      }
 
       if (stored_info) {
-        stored_info.messages.push(message_el(solution, "chat-bot"));
+        stored_info.messages.push(botMessage);
         tabs_storage[current_active_tab] = stored_info;
       }
 
@@ -307,7 +279,7 @@ function manage_chat() {
         }),
         success: function (data) {
           for (let i = 0; i < data.tests.length; i++) {
-            // сохранение полученного сообщения в sessionStorage к текущей открытой вкладке
+            // сохранение полученного сообщения в tab_storage к текущей открытой вкладке
             let stored_info = tabs_storage[current_active_tab];
 
             if (stored_info) {
@@ -336,26 +308,28 @@ document.getElementById('chat').addEventListener('contextmenu', function(event) 
 });
 
 // функция, создающая пустой тест
-function create_test(input = '', output = '', solution = '') {
-
+function create_test(input = '', output = '') {
   var test_el = document.createElement(`div`);
   test_el.classList.add(`test-box`, `d-flex`);
 
-  if (document.getElementById("contextmenu").className == "hiddden contextmenu") {
+  // if (document.getElementById("contextmenu").className == "hiddden contextmenu") {
 
-  }
+  // }
 
   var result = document.createElement('div');
   result.classList.add('test-result', 'roboto');
 
   //проверка тестов на сервере
-  result.addEventListener("click", 
-      function get_result() {
+  result.addEventListener("click", function get_result(event) {
+        var solution = document.getElementsByClassName('selected-solution')[0].firstChild.firstChild.firstChild.textContent;
+        let input = event.target.parentNode.children[0].value;
+        let output = event.target.parentNode.children[1].value;
         result.innerHTML = `<div class = "loader"></div>`
 
         if (input == '' || output == '' || solution == '') {
           console.log('input/output/solution is empty!');
           result.innerHTML = "!";
+          console.log(input, output, solution);
         }
 
         else {
@@ -367,8 +341,8 @@ function create_test(input = '', output = '', solution = '') {
             "solution": `${solution}`,
             "tests": [
               {
-                "input": `${input}`,
-                "expected": `${output}`
+                "input": `${event.target.parentNode.children[0].value}`,
+                "expected": `${event.target.parentNode.children[1].value}`
               }
             ]
           }),
@@ -385,6 +359,7 @@ function create_test(input = '', output = '', solution = '') {
               result.innerHTML = `<span>!</span>`;
               result.classList.add('error');
               console.log(data[0].message);
+              console.log(solution);
             }
           }
         })
@@ -425,18 +400,6 @@ function create_test(input = '', output = '', solution = '') {
     return test_el;
   });
 
-  //помещает текст внутри input'ов внутрь их value
-  test_el.addEventListener('contextmenu', function(event) {
-    var input_value = test_el.firstChild.value;
-    var output_value = test_el.children[1].value;
-
-    let updated_html = test_el.innerHTML.replace(/placeholder="input" value="(.*?)"/, `placeholder="input" value="${input_value}"`)
-                                        .replace(/placeholder="output" value="(.*?)"/, `placeholder="output" value="${output_value}"`);
-
-    test_el.innerHTML = updated_html;
-  });
-
-
   test_el.appendChild(result);
   return test_el;
 }
@@ -444,9 +407,6 @@ function create_test(input = '', output = '', solution = '') {
 // тот же main.js, но с использованием библиотеки jQuery
 // скрипт будет запущен тогда, когда прогрузится HTML страница с стилями 
 $(document).ready(function(){
-  // очистка sessionStorage
-  sessionStorage.clear();
-
   // создание начальной вкладки
   create_tab();
   let start_tab = document.getElementsByClassName('sidebar-pair')[0];

@@ -13,10 +13,6 @@ var tabsStorage = {
 };
 var nextId = 0;
 
-function generateId() {
-
-};
-
 // функция, которая листает в низ дива
 function scrollToBottom(div) {
   let height = div.scrollHeight;

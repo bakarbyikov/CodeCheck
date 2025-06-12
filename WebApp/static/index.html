@@ -1,105 +1,125 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>CodeCheck</title>
-    <link rel="shortcut icon" type="image/ico" href="images/favicon.ico">
-    <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet/less" type="text/css" href="style.less"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
-  </head>
-  <body>
-            <!-- contextmenu's -->
-        <!-- contextmenu для тестов -->
-    <div class="hidden contextmenu" id="contextmenu">
-      <div class='btn-grad' id="detele-test">
-        <img src="images/trash-bin.svg">
-        <div type='button' class="roboto"><span>удалить тест</span></div>
-      </div>
-    </div>
 
-        <!-- contextmenu для решений -->
-    <div class="hidden contextmenu" id="contextmenu-selected-solution">
-      <div id="select-solution">
-        <img src="images/bookmark.svg">
-        <div type='button' class="roboto"><span>Сделать выбранным решением</span></div>
-      </div>
-    </div>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>CodeCheck</title>
+  <link rel="shortcut icon" type="image/ico" href="images/favicon.ico">
+  <link rel="stylesheet" href="css/bootstrap.min.css"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet/less" type="text/css" href="style.less" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+</head>
 
-        <!-- contextmenu для вкладок -->
-    <div class="hidden contextmenu" id="contextmenu-tabs">
-      <input type='text' class='' id='tab-name' autocomplete="off" onkeypress="input_tab_name(event)"/>
-      <div id="tab-change-name">
-        <img src="images/pencil-svgrepo-com.svg">
-        <div type='button' class="roboto"><span>Редактировать название</span></div>
-      </div>
+<body>
+  <!-- contextmenu's -->
+  <!-- contextmenu для тестов -->
+  <div class="hidden contextmenu" id="contextmenu">
+    <div class='btn-grad' id="detele-test">
+      <img src="images/trash-bin.svg">
+      <div type='button' class="roboto"><span>удалить тест</span></div>
     </div>
+  </div>
 
-    <header class="border-bottom">
-      <div class="container-fluid">
-        <div class="nav d-flex align-items-center justify-content-lg-start">
-          <ul class="nav flex-wrap col-12 col-lg-auto me-lg-auto justify-content-center mb-md-0 align-items-center">
-            <li>
-              <a href="#" class="nav-link d-flex">
-                <img src="images/utmn_inv1_eng.png" id="utmn-logo" class="img-fluid">
-              </a>
-            </li>
-            <li><a href="#" class="nav-link text-dark">В начало</a></li>
-            <li><a href="#" class="nav-link text-dark">Личный кабинет</a></li>
-            <li><a href="#" class="nav-link text-dark">Мои курсы</a></li>
-            <li><a href="#" class="nav-link text-dark">Контакты</a></li>
-          </ul>
-        </div>
-      </div>
-    </header>
-    <div class="title-containter d-flex">
-      <div class="d-flex container">
-        <p class="subtitle mb-0">помощник на основе ИИ</p>
-        <p class="title mb-0">CodeCheck</p>
+  <!-- contextmenu для решений -->
+  <div class="hidden contextmenu" id="contextmenu-selected-solution">
+    <div id="select-solution">
+      <img src="images/bookmark.svg">
+      <div type='button' class="roboto"><span>Сделать выбранным решением</span></div>
+    </div>
+  </div>
+
+  <!-- contextmenu для вкладок -->
+  <div class="hidden contextmenu" id="contextmenu-tabs">
+    <input type='text' class='' id='tab-name' autocomplete="off" onkeypress="input_tab_name(event)" />
+    <div id="tab-change-name">
+      <img src="images/pencil-svgrepo-com.svg">
+      <div type='button' class="roboto"><span>Редактировать название</span></div>
+    </div>
+  </div>
+
+  <header class="border-bottom">
+    <div class="container-fluid">
+      <div class="nav d-flex align-items-center justify-content-lg-start">
+        <ul class="nav flex-wrap col-12 col-lg-auto me-lg-auto justify-content-center mb-md-0 align-items-center">
+          <li>
+            <a href="#" class="nav-link d-flex">
+              <img src="images/utmn_inv1_eng.png" id="utmn-logo" class="img-fluid">
+            </a>
+          </li>
+          <!-- <li>
+            <p class="subtitle mb-0">помощник на основе ИИ</p>
+            <p class="title mb-0">CodeCheck</p>
+          </li> -->
+          <li><a href="#" class="nav-link text-dark">В начало</a></li>
+          <!-- <li><a href="#" class="nav-link text-dark">Личный кабинет</a></li>
+          <li><a href="#" class="nav-link text-dark">Мои курсы</a></li>
+          <li><a href="#" class="nav-link text-dark">Контакты</a></li> -->
+
+        </ul>
       </div>
     </div>
-    <div id='main-menu' class="">
-      <div id="sidebar" role="group" aria-label="sidebar buttons">
-        <button id="add-tab" class="btn roboto d-flex"><span>+</span></button>
-      </div>
-      <div class="chat-container ">
-        <form id="chat-form">
-          <div id="chat">
-          </div>
-          <div class="sending">
-            <textarea id="chatInput" class='chatInput' cols='10' rows='1' placeholder="Ask me anything..." onkeypress="textarea_input(event)"></textarea>
-            <input type="button" id="submit" class="submit" value="отправить" />
-          </div>
-        </form>
-      </div>
-      <div id="tests">
-        <div class="expert-dropup btn-group dropup d-flex">
-          <button id="export" class="btn dropdown-toggle roboto" data-bs-toggle="dropdown" aria-expanded="false"><span>export</span></button>
-          <ul class="dropdown-menu">
-            <li><span class="roboto">экспорт в lms</span></li>
-            <li><input id='category' type="text" class="form-control roboto" name="" id="" placeholder="название категории" /></li>
-            <li><input id='exercise' type="text" class="form-control roboto" name="" id="" placeholder="задание" /><button class="btn"><img src="images/send.svg"></button></li>
-          </ul>
+  </header>
+  <div class="title-containter d-flex">
+    <div class="d-flex container">
+      <p class="subtitle mb-0">помощник на основе ИИ</p>
+      <p class="title mb-0">CodeCheck</p>
+    </div>
+  </div>
+  <div id='main-menu' class="">
+    <div id="sidebar" role="group" aria-label="sidebar buttons">
+      <button id="add-tab" class="btn roboto d-flex"><span>+</span></button>
+    </div>
+    <div class="chat-container ">
+      <form id="chat-form">
+        <div id="chat">
         </div>
-        <div id="test-list">
-          <button id="add-test" class="btn roboto d-flex"><span>+</span></button>
+        <div class="sending">
+          <textarea id="chatInput" class='chatInput' cols='10' rows='1' placeholder="Введите формулировку задачи..."
+            onkeypress="textarea_input(event)"></textarea>
+          <input type="button" id="submit" class="submit" value="отправить" />
         </div>
+      </form>
+    </div>
+    <div id="tests">
+      <div class="expert-dropup btn-group dropup d-flex">
+        <button id="export" class="btn dropdown-toggle roboto" data-bs-toggle="dropdown"
+          aria-expanded="false"><span>экспорт</span></button>
+        <ul class="dropdown-menu">
+          <li><span class="roboto">экспорт в lms</span></li>
+          <li><input id='category' type="text" class="form-control roboto" name="" id=""
+              placeholder="название категории" /></li>
+          <li><input id='exercise' type="text" class="form-control roboto" name="" id="" placeholder="задание" /><button
+              class="btn"><img src="images/send.svg"></button></li>
+        </ul>
+      </div>
+      <div id="test-list">
+        <button id="add-test" class="btn roboto d-flex"><span>+</span></button>
       </div>
     </div>
-    <script src="js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/test.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/less" ></script>
-    <script src="js/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
-  </body>
+  </div>
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js">
+  </script>
+  <script src="js/tester.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/test.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/less"></script>
+  <script src="js/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</body>
+
 </html>

@@ -46,9 +46,9 @@ def create_tests(request: ProblemRequest) -> TestsResponse:
     return TestsResponse(tests=tests)
 
 
-@app.post("/test_solution")
-def test_solution(request: Solution) -> list[Result]:
-    return test(request.solution, request.tests)
+# @app.post("/test_solution")
+# def test_solution(request: Solution) -> list[Result]:
+#     return test(request.solution, request.tests)
 
 
 def main():

@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>CodeCheck</title>
+    <link rel="stylesheet" href="css/default.min.css">
     <link rel="shortcut icon" type="image/ico" href="images/favicon.ico">
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/style.css">
@@ -36,10 +37,14 @@
 
         <!-- contextmenu для вкладок -->
     <div class="hidden contextmenu" id="contextmenu-tabs">
-      <input type='text' class='' id='tab-name' autocomplete="off" onkeypress="input_tab_name(event)"/>
+      <input type='text' class='' id='tab-name' autocomplete="off" onkeypress="inputTabName(event)"/>
       <div id="tab-change-name">
         <img src="images/pencil-svgrepo-com.svg">
         <div type='button' class="roboto"><span>Редактировать название</span></div>
+      </div>
+      <div id="delete-tab">
+        <img src="images/trash-bin.svg">
+        <div type='button' class="roboto"><span>Удалить вкладку</span></div>
       </div>
     </div>
 
@@ -75,14 +80,14 @@
           <div id="chat">
           </div>
           <div class="sending">
-            <textarea id="chatInput" class='chatInput' cols='10' rows='1' placeholder="Ask me anything..." onkeypress="textarea_input(event)"></textarea>
+            <textarea id="chatInput" class='chatInput' cols='10' rows='1' placeholder="Ask me anything..." onkeypress="textareaInput(event)"></textarea>
             <input type="button" id="submit" class="submit" value="отправить" />
           </div>
         </form>
       </div>
       <div id="tests">
         <div class="expert-dropup btn-group dropup d-flex">
-          <button id="export" class="btn dropdown-toggle roboto" data-bs-toggle="dropdown" aria-expanded="false"><span>export</span></button>
+          <button id="export" class="btn dropdown-toggle roboto" data-bs-toggle="dropdown" aria-expanded="false"><span>export</span><img id='arrowUp' src="images/arrow-up-d9d9d9.svg"></button>
           <ul class="dropdown-menu">
             <li><span class="roboto">экспорт в lms</span></li>
             <li><input id='category' type="text" class="form-control roboto" name="" id="" placeholder="название категории" /></li>
@@ -98,7 +103,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="js/main.js"></script>
     <script src="js/test.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/less" ></script>
+    <script src="https://cdn.jsdelivr.net/npm/less"></script>
     <script src="js/highlight.min.js"></script>
     <script>hljs.highlightAll();</script>
   </body>

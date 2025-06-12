@@ -1,7 +1,15 @@
-//анимации
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+@keyframes appearing {
+    0% {
+        opacity: 0;
+    }
+    80% {
+        opacity: 1;
+    }
 }
 
 .sidebar-button {
@@ -61,15 +69,37 @@
     }
 }
 
+.chat {
+    -webkit-transition: all 0.1s ease-in-out;
+    -moz-transition: all 0.1s ease-in-out;
+    -o-transition: all 0.1s ease-in-out;
+    transition: all 0.1s ease-in-out;
+}
+
 #export, #add-test, #add-tab {
-    @height: 32px;
+    @height: 3vh;
     font-size: 1rem;
     line-height: @height;
-    padding: 4px 26px;
-    font-weight: 400;
-    margin-bottom: 0.6rem;
+    padding: 0.8vh 2vh;
     background: rgba(55,55,55);
     color: #d9d9d9;
+
+    img {
+        -webkit-transition: all 0.3s ease-in-out;
+        -moz-transition: all 0.3s ease-in-out;
+        -o-transition: all 0.3s ease-in-out;
+        transition: all 0.3s ease-in-out;
+
+        margin-left: 0.5rem;
+        width: 1rem;
+        height: 1rem;
+        align-self: center;
+    }
+    
+
+    &::after {
+        content: none;
+    }
 
     &:hover {
         background-color:rgba(55,55,55,0.6);
@@ -356,6 +386,17 @@
         .code-solvation {
             border-radius: 0px;
             padding-top: 0.3rem;
+            -webkit-transition: all 0.1s ease-in-out;
+            -moz-transition: all 0.1s ease-in-out;
+            -o-transition: all 0.1s ease-in-out;
+            transition: all 0.1s ease-in-out;
+
+            * {
+                -webkit-transition: all 0.1s ease-in-out;
+                -moz-transition: all 0.1s ease-in-out;
+                -o-transition: all 0.1s ease-in-out;
+                transition: all 0.1s ease-in-out;
+            }
         }
 
         p {
@@ -482,12 +523,13 @@
     }
 
     div {
-        align-self: center;
+        align-self: stretch;
         display: flex;
         flex-direction: row;
         border-radius: 1%;
         color:#0a0a0a;
         padding: 6px;
+        margin-bottom: 2px;
 
         span {
             display: inline;
@@ -527,9 +569,8 @@
     background-color: whitesmoke;
     align-items: center;
 
-    #tab-change-name {
-        margin-bottom: 2px;
-        
+    #tab-change-name, #delete-tab {
+
         &:hover {
             background-color: #35abff;
         }

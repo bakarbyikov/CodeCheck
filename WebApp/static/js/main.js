@@ -1,80 +1,102 @@
 // получаем HTML DOM
 const textarea = document.getElementById('chatInput');
 const submit = document.getElementById("submit");
-const chat_body = document.getElementById('chat');
-const add_test = document.getElementById('add-test');
-const test_list = document.getElementById('test-list');
-const add_tab = document.getElementById('add-tab');
-const side_bar = document.getElementById('sidebar');
-var tabs_storage = {
+const chatBody = document.getElementById('chat'); 
+const addTest = document.getElementById('add-test');
+const testList = document.getElementById('test-list');
+const addTab = document.getElementById('add-tab');
+const sideBar = document.getElementById('sidebar');
+const exportButton = document.getElementById('export');
+var rotated = false;
+var tabsStorage = {
+
+};
+var nextId = 0;
+
+function generateId() {
 
 };
 
+// функция, которая листает в низ дива
+function scrollToBottom(div) {
+  let height = div.scrollHeight;
+  console.log(height);
+  chatBody.scrollIntoView(false);
+  //div.scrollTop = height;
+  //div.scrollTop.behavior = 'smooth';
+};
+
 //позволяет делать спуск в поле текста на shift+enter
-function textarea_input(event) {
+function textareaInput(event) 
+{
   let value = event.which;
 
-  if (value == 13 && !event.shiftKey) {
+  if (value == 13 && !event.shiftKey){
     event.preventDefault();
-    manage_chat();
+    manageChat();
   };
 }
 
-function input_tab_name(event) {
+function inputTabName(event) 
+{
   let value = event.which;
 
-  if (value == 13 && !event.shiftKey) {
+  if (value == 13 && !event.shiftKey){
     event.preventDefault();
     $('#tab-change-name').click();
   };
 }
-// скелет создания вкладки
-function tab_creation(label = "Новая вкладка") {
-  let start_message = document.createElement(`div`);
-  start_message.classList.add('chat', 'chat-bot');
 
-  let start_span = document.createElement(`span`);
-  start_span.textContent = 'Здравствуйте! Что нужно решить для вас сегодня?';
+// Создание стартового сообщения
+var startMessage = document.createElement(`div`);
+startMessage.classList.add('chat', 'chat-bot');
 
-  start_message.appendChild(start_span);
+var startSpan = document.createElement(`span`);
+startSpan.textContent = 'Здравствуйте! Что нужно решить для вас сегодня?';
 
-  tabs_storage[label] = {
-    messages: [start_message],
-    tests: []
-  };
+startMessage.appendChild(startSpan);
+
+tabsStorage[nextId] = {
+  messages : [startMessage],
+  tests : []
 };
-// объявление стартового сообщения
-// tab_creation();
-// функция, создающая пустую вкладку
-function create_tab(label = "Новая вкладка") {
-  while (label in tabs_storage) {
-    label += "+";
-  };
-  tab_creation(label);
-  var tab_el = document.createElement(`div`);
-  tab_el.classList.add(`d-flex`, `sidebar-pair`);
 
-  tab_el.innerHTML = `<button type="button" class="btn sidebar-button" data-toggle="button" aria-pressed="true"><span>${label}</span></button>`;
+nextId += 1;
+
+// функция, создающая пустую вкладку
+function createTab(label = "Новая вкладка") {
+  var tabEl = document.createElement(`div`);
+  tabEl.id = nextId;
+  nextId += 1;
+  tabEl.classList.add(`d-flex`, `sidebar-pair`);
+
+  tabEl.innerHTML = `<button type="button" class="btn sidebar-button" data-toggle="button" aria-pressed="true"><span>${label}</span></button>`;
+
+  // добавление нового id в tabsStorage
+  tabsStorage[tabEl.id] = {
+    messages: [startMessage],
+    tests : []
+  }
 
   // моё contextmenu с функцией удаление вкладки
-  tab_el.addEventListener('contextmenu', function (event) {
+  tabEl.addEventListener('contextmenu', function(event) {
     event.preventDefault();
 
     // гарантия наличия лишь одной выбранной вкладки для работы с contextmenu
     $('.sidebar-pair').removeClass('selected-tab');
 
     let e = window.event;
-    let window_width = window.innerWidth;
+    let windowWidth = window.innerWidth;
 
     //граматное появление contextmenu относительно свободного места экрана
-    if (window_width - e.clientX < 134) {
+    if (windowWidth - e.clientX < 134) {
       var x = e.clientX - 134;
     }
     else {
       var x = e.clientX + 6;
     }
 
-    if (window_width - e.clientY < 36 * 2) {
+    if (windowWidth - e.clientY < 36*2) {
       var y = e.clientY - 40;
     }
     else {
@@ -85,301 +107,318 @@ function create_tab(label = "Новая вкладка") {
     document.getElementById('contextmenu-tabs').style.top = y + 'px';
     document.getElementById('contextmenu-tabs').style.left = x + 'px';
 
-    tab_el.classList.add('selected-tab');
+    tabEl.classList.add('selected-tab');
   });
 
-  // выделяет активную вкладку
-  tab_el.addEventListener("click", function (event) {
+  // выделяет активную вкладку и прогружает хранящиеся сообщения и тесты
+  tabEl.addEventListener("click", function(event) {
     $('.sidebar-pair').removeClass('active-tab');
+    var tabsId = tabEl.id;
 
-    tab_el.classList.add('active-tab');
-    let stored_info = tabs_storage[document.getElementsByClassName('active-tab')[0].firstChild.firstChild.textContent];
-
-    chat_body.innerHTML = '';
-    test_list.innerHTML = '';
+    tabEl.classList.add('active-tab');
+    let storedInfo = tabsStorage[tabsId];
+    
+    chatBody.innerHTML = '';
+    testList.innerHTML = '';
 
     // вывод сообщений и тестов
-    if (stored_info.tests.length > 0) {
-      for (let i = 0; i <= stored_info.tests.length - 1; i++) {
-        test_list.appendChild(stored_info.tests[i]);
+    if (storedInfo.tests.length > 0) {
+      for (let i = 0; i <= storedInfo.tests.length - 1; i++) {
+        testList.appendChild(storedInfo.tests[i]);
       };
     };
 
-    if (stored_info.messages.length > 0) {
-      for (let i = 0; i <= stored_info.messages.length - 1; i++) {
-        chat_body.appendChild(stored_info.messages[i]);
+    if (storedInfo.messages.length > 0) {
+      for (let i = 0; i <= storedInfo.messages.length - 1; i++) {
+        chatBody.appendChild(storedInfo.messages[i]);
       };
     };
-
-    test_list.appendChild(add_test);
+    
+    testList.appendChild(addTest);
   });
 
-  side_bar.insertBefore(tab_el, add_tab);
+  sideBar.insertBefore(tabEl, addTab);
 }
 
-//  смена названия вкладки
-$('#tab-change-name').click(function (event) {
-  let new_tab_name = document.getElementById("tab-name");
-  let tab_to_change_name = document.getElementsByClassName('selected-tab')[0];
-  let all_tabs = document.getElementsByClassName('sidebar-pair');
+// смена названия вкладки
+$('#tab-change-name').click(function(event) {
+  let newTabName = document.getElementById("tab-name");
+  let tabToChangeName = document.getElementsByClassName('selected-tab')[0];
 
-  // предупреждение насчёт вкладок с одинаковыми названиями
-  let checkNames = false;
-  for (let i = 0; i < all_tabs.length - 1; i++) {
-    if (new_tab_name.value == all_tabs[i].firstChild.firstChild.textContent) {
-      checkNames = true;
-    }
-  };
-  if (checkNames) {
-    console.log('Предупреждение : вкладки с одинаковыми именами хранят общие сообщения и тесты!');
-    return;
+  tabToChangeName.firstChild.firstChild.textContent = newTabName.value;
+});
+
+$("#delete-tab").click(function(event) {
+  let tab = document.getElementsByClassName('selected-tab')[0];
+  let tabsId = tab.id;
+  let tabList = tab.classList;
+
+  // запрет на удаление единственной вкладки
+  if (sideBar.children.length != 2) {
+    sideBar.removeChild(tab);
+    delete tabsStorage[tabsId];
+  } else {
+    console.log("Нельзя удалить единственную вкладку");
+    $('.sidebar-pair').removeClass('selected-tab');
   }
 
-  // изменяет ключ(название вкладки) в sessionStorage на новое
-  let stored_info = tabs_storage[tab_to_change_name.firstChild.firstChild.textContent];
-  tabs_storage[new_tab_name.value] = stored_info;
+  // выбор новой выбранной вкладки, если удаляемая была выбранной :D
+  let check = false;
+  for (let i = 0; i < tabList.length - 1; i++) {
+    if (tabList[i] == "active-tab") {
+      check = true;
+    }
+  }
+  if (check) {
+    document.getElementsByClassName("sidebar-pair")[0].click();
+  }
+  // if (tab.classList.includes('active-tab')) {
+  //   document.getElementsByClassName("sidebar-pair")[0].classList.add('selected-tab');
+  // }
 
-  if (tab_to_change_name.firstChild.firstChild.textContent != "Новая вкладка") {
-    delete tabs_storage[tab_to_change_name.firstChild.firstChild.textContent];
-    console.log(`deleted ${tab_to_change_name.firstChild.firstChild.textContent} from tabs_storage`);
-  } else {
-    // объявление стартового сообщения
-    let start_message = document.createElement(`div`);
-    start_message.classList.add('chat', 'chat-bot');
-
-    let start_span = document.createElement(`span`);
-    start_span.textContent = 'Здравствуйте! Что нужно решить для вас сегодня?';
-
-    start_message.appendChild(start_span);
-
-    tabs_storage["Новая вкладка"] = {
-      messages: [start_message],
-      tests: []
-    };
-  };
-
-  console.log(tabs_storage);
-  tab_to_change_name.firstChild.firstChild.textContent = new_tab_name.value;
+  document.getElementById('contextmenu-tabs').className = 'hidden contextmenu';
 });
 
 //оформление полученного сообщения message в html документе
-function message_el(message, class_name) {
-  var chat_el = document.createElement(`div`);
-  chat_el.classList.add(`chat`, `${class_name}`);
-  let chat_content;
+function messageEl (message, className) {
+    var chatEl = document.createElement(`div`);
+    chatEl.classList.add(`chat`, `${className}`);
+    let chatContent;    
+  
+    if (className == "user") {
+      chatContent = `<p>${message}</p>`;
+    }
 
-  if (class_name == "user") {
-    chat_content = `<p>${message}</p>`;
-  }
+    if (className == "chat-bot") {
+      chatContent = `<div class="code-solvation"><pre><code class="hljs python-html">${message}</code></pre></div>`;
 
-  if (class_name == "chat-bot") {
-    chat_content = `<div class="code-solvation"><pre><code class="hljs python-html jetbrains-mono">${message}</code></pre></div>`;
+      chatEl.addEventListener('contextmenu', function(event) {
+        event.preventDefault();
+        let e = window.event;
+        let windowWidth = window.innerWidth;
 
-    chat_el.addEventListener('contextmenu', function (event) {
-      event.preventDefault();
-      let e = window.event;
-      let window_width = window.innerWidth;
+        //граматное появление contextmenu относительно свободного места экрана
+        if (windowWidth - e.clientX < 134) {
+          var x = e.clientX - 134;
+        }
+        else {
+          var x = e.clientX + 6;
+        }
 
-      //граматное появление contextmenu относительно свободного места экрана
-      if (window_width - e.clientX < 134) {
-        var x = e.clientX - 134;
-      }
-      else {
-        var x = e.clientX + 6;
-      }
+        if (windowWidth - e.clientY < 36*2) {
+          var y = e.clientY - 40;
+        }
+        else {
+          var y = e.clientY;
+        }
 
-      if (window_width - e.clientY < 36 * 2) {
-        var y = e.clientY - 40;
-      }
-      else {
-        var y = e.clientY;
-      }
+        document.getElementById('contextmenu-selected-solution').className = "shown contextmenu";
+        document.getElementById('contextmenu-selected-solution').style.top = y + 'px';
+        document.getElementById('contextmenu-selected-solution').style.left = x + 'px';
 
-      document.getElementById('contextmenu-selected-solution').className = "shown contextmenu";
-      document.getElementById('contextmenu-selected-solution').style.top = y + 'px';
-      document.getElementById('contextmenu-selected-solution').style.left = x + 'px';
+        $("#select-solution").click(function() {
+          $('.chat-bot').removeClass('selected-solution');
 
-      $("#select-solution").click(function () {
-        $('.chat-bot').removeClass('selected-solution');
+          chatEl.classList.add('selected-solution');
+        });
 
-        chat_el.classList.add('selected-solution');
       });
+    }
 
-    });
-  }
-
-  chat_el.innerHTML = chat_content;
-  return chat_el;
+    chatEl.innerHTML = chatContent;
+      return chatEl;
 }
 
 //возможность нажатия на кнопки на contextmenu при помощи пкм
-document.getElementById("detele-test").addEventListener('contextmenu', function (e) {
+document.getElementById("detele-test").addEventListener('contextmenu', function(e) {
   e.preventDefault();
   $("#detele-test").click();
 })
 
-document.getElementById("select-solution").addEventListener('contextmenu', function (e) {
+document.getElementById("select-solution").addEventListener('contextmenu', function(e) {
   e.preventDefault();
   $("#select-solution").click();
 })
 
 //отправление сообщения и получение решения с сервера
-function manage_chat() {
-  var user_message = textarea.value.trim();
+function manageChat() {
+  var userMessage = textarea.value.trim();
 
-  if (!user_message) return;
+  if (!userMessage) return;
 
   textarea.value = "";
 
-  var current_active_tab = document.getElementsByClassName('active-tab')[0].firstChild.firstChild.textContent;
-  var stored_info = tabs_storage[current_active_tab];
+  var tabsId = document.getElementsByClassName('active-tab')[0].id;
+  var storedInfo = tabsStorage[tabsId];
+  
+  console.log(chatBody.scrollHeight);
 
-  // сохранение отправленного сообщения пользователя в tabs_storage к текущей открытой вкладке
-  if (stored_info) {
-    stored_info.messages.push(message_el(user_message, "user"));
-    tabs_storage[current_active_tab] = stored_info;
-  }
+  // сохранение отправленного сообщения пользователя в tabsStorage к текущей открытой вкладке
+  if (storedInfo) {
+    let userMessageHtml = messageEl(userMessage, "user");
+    chatBody.appendChild(userMessageHtml);
 
-  //console.log(tabs_storage);
+    storedInfo.messages.push(userMessageHtml);
+    tabsStorage[tabsId] = storedInfo;
+    }
 
   var countOfMessages = document.getElementsByClassName('chat chat-bot').length;
+
+  var botMessage = messageEl("...", "chat-bot");
+  botMessage.style = "animation: appearing 0.3s linear";
+  chatBody.appendChild(botMessage);
+  setTimeout(() => {
+    botMessage.style = ""
+    tabsStorage[tabsId].messages.push(botMessage)
+  }, 1000);
+
+  var idOfBotMessage = chatBody.children.length - 1;
 
   $.ajax({
     type: "POST",
     contentType: "application/json; charset=utf-8",
     url: "https://olegpepeg.ru/api/chat",
     data: JSON.stringify({
-      "messages": [
+      "messages" : [
         {
-          "role": "user",
-          "content": `${user_message}`
+          "role" : "user", 
+          "content" : `${userMessage}`
         }
       ]
     }),
     success: function (data) {
       var solution = data.solution;
-      var botMessage = message_el(solution, "chat-bot");
+      var botMessageNew = messageEl(solution, "chat-bot");
 
-      // сохранение полученного сообщения в tab_storage к текущей открытой вкладке
-      var stored_info = tabs_storage[current_active_tab];
+      // сохранение полученного сообщения в tabStorage к текущей открытой вкладке
+      var storedInfo = tabsStorage[tabsId];
 
       if (countOfMessages == 1) {
-        botMessage.classList.add('selected-solution');
-      }
+        botMessageNew.classList.add('selected-solution');
+      };
 
-      if (stored_info) {
-        stored_info.messages.push(botMessage);
-        tabs_storage[current_active_tab] = stored_info;
-      }
-
-      document.getElementsByClassName('active-tab')[0].click();
+      if (storedInfo) {
+        tabsStorage[tabsId].messages[idOfBotMessage] = botMessageNew;
+        chatBody.replaceChild(botMessageNew, botMessage);
+      };
 
       $.ajax({
         type: "POST",
         contentType: "application/json; charset=utf-8",
         url: "https://olegpepeg.ru/api/create_tests",
         data: JSON.stringify({
-          "problem": `${user_message}`
+          "problem": `${userMessage}`
         }),
         success: function (data) {
           for (let i = 0; i < data.tests.length; i++) {
-            // сохранение полученного сообщения в tab_storage к текущей открытой вкладке
-            let stored_info = tabs_storage[current_active_tab];
+            // сохранение полученного сообщения в tabStorage к текущей открытой вкладке
+            let storedInfo = tabsStorage[tabsId];
 
-            if (stored_info) {
-              stored_info.tests.push(create_test(input = data.tests[i].input, output = data.tests[i].expected, solution = solution));
-              tabs_storage[current_active_tab] = stored_info;
+            if (storedInfo) {
+              let test = createTest(input = data.tests[i].input, output = data.tests[i].expected, solution = solution);
+              tabsStorage[tabsId].tests.push(test);
+              testList.insertBefore(test, addTest);
             }
           }
-          document.getElementsByClassName('active-tab')[0].click();
         }
       });
     }
   });
-  document.getElementsByClassName('active-tab')[0].click();
 }
 
-document.getElementById('sidebar').addEventListener('contextmenu', function (event) {
+// выключение открытие встроенного contextmenu 
+document.getElementById('sidebar').addEventListener('contextmenu', function(event) {
+    event.preventDefault();
+});
+
+document.getElementById('tests').addEventListener('contextmenu', function(event) {
   event.preventDefault();
 });
 
-document.getElementById('tests').addEventListener('contextmenu', function (event) {
-  event.preventDefault();
-});
-
-document.getElementById('chat').addEventListener('contextmenu', function (event) {
+document.getElementById('chat').addEventListener('contextmenu', function(event) {
   event.preventDefault();
 });
 
 // функция, создающая пустой тест
-function create_test(input = '', output = '') {
-  var test_el = document.createElement(`div`);
-  test_el.classList.add(`test-box`, `d-flex`);
-
-  // if (document.getElementById("contextmenu").className == "hiddden contextmenu") {
-
-  // }
+function createTest(input = '', output = '') {
+  var testEl = document.createElement(`div`);
+  testEl.classList.add(`test-box`, `d-flex`);
 
   var result = document.createElement('div');
   result.classList.add('test-result', 'roboto');
 
   //проверка тестов на сервере
-  result.addEventListener("click", function get_result(event) {
-    var solution = document.getElementsByClassName('selected-solution')[0].firstChild.firstChild.firstChild.textContent;
+  result.addEventListener("click", function getResult(event) {
+    if (document.getElementsByClassName('selected-solution')[0]) {
+      var solution = document.getElementsByClassName('selected-solution')[0].firstChild.firstChild.firstChild.textContent;
+    } else {
+      var solution = "";
+    };
+    
     let input = event.target.parentNode.children[0].value;
     let output = event.target.parentNode.children[1].value;
-    result.innerHTML = `<div class = "loader"></div>`
+    result.innerHTML = `<div class = "loader"></div>`;
 
-    if (input == '' || output == '' || solution == '') {
+    if (input == '' || output == '') {
       console.log('input/output/solution is empty!');
       result.innerHTML = "!";
-      console.log(input, output, solution);
-      return
     }
 
-    test(solution, input, output).then(
-      function (data) {
-        console.log(`result: ${JSON.stringify(data)}`)
-        if (data.status == "Passed") {
+    else {
+      $.ajax({
+      type: "POST",
+      contentType: "application/json; charset=utf-8",
+      url: "https://olegpepeg.ru/api/test_solution",
+      data: JSON.stringify({
+        "solution": `${solution}`,
+        "tests": [
+          {
+            "input": `${event.target.parentNode.children[0].value}`,
+            "expected": `${event.target.parentNode.children[1].value}`
+          }
+        ]
+      }),
+      success: function (data) {
+        if (data[0].status == "Passed") {
           result.innerHTML = `<span>+</span>`;
           result.classList.add(`passed`);
         }
-        else if (data.status == "Failed") {
+        else if (data[0].status == "Failed"){
           result.innerHTML = `<span>-</span>`;
           result.classList.add('failed');
         }
         else {
           result.innerHTML = `<span>!</span>`;
           result.classList.add('error');
-          console.log(data.message);
+          console.log(data[0].message);
           console.log(solution);
         }
       }
-    )
-  }
-  );
+      })
+    };
+  });
+  
+  innerHtml = `<input type="text" class="input form-control roboto d-flex" placeholder="input" value="${input}" /><input type="text" class="output form-control roboto d-flex" placeholder="output" value="${output}" />`;
+  testEl.innerHTML = innerHtml;
 
-  inner_html = `<input type="text" class="input form-control roboto d-flex" placeholder="входные данные" value="${input}" /><input type="text" class="output form-control roboto d-flex" placeholder="выходные данные" value="${output}" />`;
-  test_el.innerHTML = inner_html;
-
-  test_el.addEventListener('contextmenu', function (event) {
+  testEl.addEventListener('contextmenu', function(event) {
     event.preventDefault();
 
     let e = window.event;
-    let window_width = window.innerWidth;
+    let windowWidth = window.innerWidth;
 
-    test_el.classList.add('selected-test-box');
+    testEl.classList.add('selected-test-box');
 
     //граматное появление contextmenu относительно свободного места экрана
-    if (window_width - e.clientX < 134) {
+    if (windowWidth - e.clientX < 134) {
       var x = e.clientX - 134;
     }
     else {
       var x = e.clientX;
     }
 
-    if (window_width - e.clientY < (36 * 2 + 12)) {
-      var y = e.clientY - (36 * 2 + 20);
+    if (windowWidth - e.clientY < (36*2 + 12)) {
+      var y = e.clientY - (36*2 + 20);
     }
     else {
       var y = e.clientY;
@@ -388,55 +427,66 @@ function create_test(input = '', output = '') {
     document.getElementById('contextmenu').className = "shown contextmenu";
     document.getElementById('contextmenu').style.top = y + 'px';
     document.getElementById('contextmenu').style.left = x + 'px';
-
-    return test_el;
+    
+    return testEl;
   });
 
-  test_el.appendChild(result);
-  return test_el;
+  testEl.appendChild(result);
+  return testEl;
 }
 
-// тот же main.js, но с использованием библиотеки jQuery
+// анимация стрелочки у кнопки export
+exportButton.addEventListener("click", function(event) {
+  let arrowUp = document.getElementById('arrowUp');  
+  let deg = rotated? 0 : 180;
+
+  arrowUp.style.webkitTransform = 'rotate('+deg+'deg)'; 
+  arrowUp.style.mozTransform    = 'rotate('+deg+'deg)'; 
+  arrowUp.style.msTransform     = 'rotate('+deg+'deg)'; 
+  arrowUp.style.oTransform      = 'rotate('+deg+'deg)'; 
+  arrowUp.style.transform       = 'rotate('+deg+'deg)';
+
+  rotated = !rotated;
+});
+
 // скрипт будет запущен тогда, когда прогрузится HTML страница с стилями 
-$(document).ready(function () {
+$(document).ready(function(){
   // создание начальной вкладки
-  create_tab();
-  let start_tab = document.getElementsByClassName('sidebar-pair')[0];
-  start_tab.click();
+  createTab();
+  let startTab = document.getElementsByClassName('sidebar-pair')[0];
+  startTab.click();
 
   $('#submit').click(function () {
-    manage_chat();
+    manageChat();
   });
+  
+  $('#add-test').click(function() {
+    let tabsId = document.getElementsByClassName('active-tab')[0].id;
+    let storedInfo = tabsStorage[tabsId];
 
-  $('#add-test').click(function () {
-    let current_active_tab = document.getElementsByClassName('active-tab')[0].firstChild.firstChild.textContent;
-    let stored_info = tabs_storage[current_active_tab];
-
-    if (stored_info) {
-      stored_info.tests.push(create_test());
-      tabs_storage[current_active_tab] = stored_info;
+    if (storedInfo) {
+      let test = createTest();
+      tabsStorage[tabsId].tests.push(test);
+      testList.insertBefore(test, addTest);
     }
-
-    document.getElementsByClassName('active-tab')[0].click();
   });
-
-  $('#add-tab').click(function () {
-    create_tab();
+  
+  $('#add-tab').click(function() {
+    createTab();
   });
-
-  $(document).bind("click", function (event) {
+  
+  $(document).bind("click", function(event) {
     $('.selected-test-box').removeClass('selected-test-box');
     document.getElementById('contextmenu').className = 'hidden contextmenu';
     document.getElementById('contextmenu-selected-solution').className = 'hidden contextmenu';
 
     if ((!document.getElementById('contextmenu-tabs').contains(event.target)) || (document.getElementById('tab-change-name').contains(event.target))) {
-      //console.log(event.target.id);
       document.getElementById('contextmenu-tabs').className = 'hidden contextmenu';
       $('.sidebar-pair').removeClass('selected-tab');
     }
   });
 
-  $('#detele-test').click(function () {
+  $('#detele-test').click(function() {
     $('.selected-test-box').remove();
   });
 });

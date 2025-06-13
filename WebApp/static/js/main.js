@@ -7,6 +7,7 @@ const testList = document.getElementById('test-list');
 const addTab = document.getElementById('add-tab');
 const sideBar = document.getElementById('sidebar');
 const exportButton = document.getElementById('export');
+const newTabName = document.getElementById("tab-name");
 var rotated = false;
 var tabsStorage = {
 
@@ -138,7 +139,6 @@ function createTab(label = "Новая вкладка") {
 
 // смена названия вкладки
 $('#tab-change-name').click(function(event) {
-  let newTabName = document.getElementById("tab-name");
   let tabToChangeName = document.getElementsByClassName('selected-tab')[0];
 
   tabToChangeName.firstChild.firstChild.textContent = newTabName.value;
@@ -295,7 +295,9 @@ function manageChat() {
 
       if (storedInfo) {
         tabsStorage[tabsId].messages[idOfBotMessage] = botMessageNew;
-        chatBody.replaceChild(botMessageNew, botMessage);
+        if (document.getElementsByClassName('active-tab')[0].id == tabsId) {
+          chatBody.replaceChild(botMessageNew, botMessage);
+        };
       };
 
       $.ajax({
@@ -313,7 +315,9 @@ function manageChat() {
             if (storedInfo) {
               let test = createTest(input = data.tests[i].input, output = data.tests[i].expected, solution = solution);
               tabsStorage[tabsId].tests.push(test);
-              testList.insertBefore(test, addTest);
+              if (document.getElementsByClassName('active-tab')[0].id == tabsId) { 
+                testList.insertBefore(test, addTest);
+              }
             }
           }
         }
@@ -479,6 +483,7 @@ $(document).ready(function(){
     if ((!document.getElementById('contextmenu-tabs').contains(event.target)) || (document.getElementById('tab-change-name').contains(event.target))) {
       document.getElementById('contextmenu-tabs').className = 'hidden contextmenu';
       $('.sidebar-pair').removeClass('selected-tab');
+      newTabName.value = '';
     }
   });
 

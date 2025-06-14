@@ -344,55 +344,40 @@ function createTest(input = '', output = '') {
   result.classList.add('test-result', 'roboto');
 
   //проверка тестов на сервере
-  result.addEventListener("click", function getResult(event) {
-    if (document.getElementsByClassName('selected-solution')[0]) {
-      var solution = document.getElementsByClassName('selected-solution')[0].firstChild.firstChild.firstChild.textContent;
-    } else {
-      var solution = "";
-    };
-    
+  result.addEventListener("click", function get_result(event) {
+    var solution = document.getElementsByClassName('selected-solution')[0].firstChild.firstChild.firstChild.textContent;
     let input = event.target.parentNode.children[0].value;
     let output = event.target.parentNode.children[1].value;
-    result.innerHTML = `<div class = "loader"></div>`;
+    result.innerHTML = `<div class = "loader"></div>`
 
-    if (input == '' || output == '') {
+    if (input == '' || output == '' || solution == '') {
       console.log('input/output/solution is empty!');
       result.innerHTML = "!";
+      console.log(input, output, solution);
+      return
     }
 
-    else {
-      $.ajax({
-      type: "POST",
-      contentType: "application/json; charset=utf-8",
-      url: "https://olegpepeg.ru/api/test_solution",
-      data: JSON.stringify({
-        "solution": `${solution}`,
-        "tests": [
-          {
-            "input": `${event.target.parentNode.children[0].value}`,
-            "expected": `${event.target.parentNode.children[1].value}`
-          }
-        ]
-      }),
-      success: function (data) {
-        if (data[0].status == "Passed") {
+    test(solution, input, output).then(
+      function (data) {
+        console.log(`result: ${JSON.stringify(data)}`)
+        if (data.status == "Passed") {
           result.innerHTML = `<span>+</span>`;
           result.classList.add(`passed`);
         }
-        else if (data[0].status == "Failed"){
+        else if (data.status == "Failed") {
           result.innerHTML = `<span>-</span>`;
           result.classList.add('failed');
         }
         else {
           result.innerHTML = `<span>!</span>`;
           result.classList.add('error');
-          console.log(data[0].message);
+          console.log(data.message);
           console.log(solution);
         }
       }
-      })
-    };
-  });
+    )
+  }
+  );
   
   innerHtml = `<input type="text" class="input form-control roboto d-flex" placeholder="input" value="${input}" /><input type="text" class="output form-control roboto d-flex" placeholder="output" value="${output}" />`;
   testEl.innerHTML = innerHtml;

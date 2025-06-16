@@ -1,14 +1,17 @@
 // получаем HTML DOM
 const textarea = document.getElementById('chatInput');
-const submit = document.getElementById("submit");
+const submit = document.getElementById('submit');
 const chatBody = document.getElementById('chat'); 
 const addTest = document.getElementById('add-test');
 const testList = document.getElementById('test-list');
 const addTab = document.getElementById('add-tab');
 const sideBar = document.getElementById('sidebar');
 const exportButton = document.getElementById('export');
-const newTabName = document.getElementById("tab-name");
+const newTabName = document.getElementById('tab-name');
 const deleteTab = document.getElementById('delete-tab');
+const inputCategory = document.getElementById('category');
+const nameOfFile = document.getElementById('nameOfFile');
+const downloadXmlFile = document.getElementById('download-moodle-xml');
 var rotated = false;
 var tabsStorage = {
 
@@ -441,6 +444,70 @@ exportButton.addEventListener("click", function(event) {
 
   rotated = !rotated;
 });
+
+// скачивание решения в формате moodle xml
+downloadXmlFile.addEventListener('click', function(event) {
+  download();
+});
+
+// скачивание тестов и задания в формате moodle xml с плагином coderunner
+function download() {
+  var selectedQuestion = document.getElementsByClassName('chat user')[0].firstChild.textContent;
+  var amountOfTests = document.getElementsByClassName('test-box').length;
+  
+  if (nameOfFile.value != '') {
+    var filename = nameOfFile.value;
+  } else {
+    var filename = 'solution.xml';
+  }
+  if (inputCategory.value != '') {
+    var nameOfQuestion = inputCategory.value;
+  } else {
+    var nameOfQuestion = 'Название задания';
+  }
+
+  var xml = `<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+  <question type="coderunner">
+    <name>
+      <text>${nameOfQuestion}</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>${selectedQuestion}</p>]]></text>
+    </questiontext>
+    <testcases>`;
+
+  // добавление всех вопросов
+  for (let i = 0; i < amountOfTests - 1; i++) {
+    let test = document.getElementsByClassName('test-box')[i];
+    xml += `
+      <testcase testtype="0" useasexample="0" hiderestiffail="0" mark="1.0000000" >
+        <stdin>
+                  <text>${test.children[0].value}</text>
+        </stdin>
+        <expected>
+                  <text>${test.children[1].value}</text>
+        </expected>
+      </testcase>`;
+  };
+
+  xml += `
+    </testcases>
+  </question>
+</quiz>`;
+
+  var blob = new Blob([xml], {type: 'application/xml'});
+  var url = URL.createObjectURL(blob);
+  var link = document.createElement('a');
+
+  link.setAttribute('download', filename);
+  link.href = url;
+  document.body.appendChild(link);
+  link.click();
+
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
 
 // скрипт будет запущен тогда, когда прогрузится HTML страница с стилями 
 $(document).ready(function(){

@@ -349,10 +349,14 @@ function createTest(input = '', output = '') {
 
   //проверка тестов на сервере
   result.addEventListener("click", function get_result(event) {
-    var solution = document.getElementsByClassName('selected-solution')[0].firstChild.firstChild.firstChild.textContent;
+    var solution;
     let input = event.target.parentNode.children[0].value;
     let output = event.target.parentNode.children[1].value;
-    result.innerHTML = `<div class = "loader"></div>`
+    result.innerHTML = `<div class = "loader"></div>`;
+
+    if (document.getElementsByClassName('selected-solution').length != 0) {
+      var solution = document.getElementsByClassName('selected-solution')[0].firstChild.firstChild.firstChild.textContent;
+    }
 
     if (input == '' || output == '' || solution == '') {
       console.log('input/output/solution is empty!');
@@ -363,7 +367,7 @@ function createTest(input = '', output = '') {
 
     test(solution, input, output).then(
       function (data) {
-        console.log(`result: ${JSON.stringify(data)}`)
+        // console.log(`result: ${JSON.stringify(data)}`)
         if (data.status == "Passed") {
           result.innerHTML = `<span>+</span>`;
           result.classList.add(`passed`);
@@ -375,8 +379,8 @@ function createTest(input = '', output = '') {
         else {
           result.innerHTML = `<span>!</span>`;
           result.classList.add('error');
-          console.log(data.message);
-          console.log(solution);
+          // console.log(data.message);
+          // console.log(solution);
         }
       }
     )

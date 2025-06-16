@@ -40,7 +40,7 @@ class Model:
                               re.DOTALL)
     json_pattern = re.compile("```json([^`]*)", re.DOTALL)
 
-    def __init__(self, model="qwen2.5-coder:3b"):
+    def __init__(self, model="qwen2.5-coder:14b"):
         self.model = model
         me = id(self)
         self.logger = logger.bind(model=me)

@@ -12,6 +12,18 @@
     }
 }
 
+@media screen and (max-width: 700px){
+    .test-box {
+        flex-direction: column !important;
+        input {
+            width:auto !important;
+        }
+        div {
+            align-self: center;
+        }
+    }
+}
+
 .sidebar-button {
     @text-color: #f9f7f8;
     @height: 32px;
@@ -49,15 +61,27 @@
 }
 
 .active-tab {
+    &.selected-tab {
+        border-radius: 5px;
+        .sidebar-button { 
+            &:focus {
+                background: none;
+            }
+        }
+    }
+}
+
+.active-tab {
     @text-color: #f9f7f8;
     @height: 32px;
     @width: 8px;
     @m-r: 16px;
     text-decoration: none;
     color: @text-color;
+    align-items: center;
 
     &::before {
-        @height-before: 26px;
+        @height-before: 1.6rem;
         margin-right: @m-r;
         width: @width;
         height: @height-before;

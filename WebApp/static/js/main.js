@@ -8,6 +8,7 @@ const addTab = document.getElementById('add-tab');
 const sideBar = document.getElementById('sidebar');
 const exportButton = document.getElementById('export');
 const newTabName = document.getElementById("tab-name");
+const deleteTab = document.getElementById('delete-tab');
 var rotated = false;
 var tabsStorage = {
 
@@ -146,19 +147,18 @@ $('#tab-change-name').click(function(event) {
 
 $("#delete-tab").click(function(event) {
   let tab = document.getElementsByClassName('selected-tab')[0];
-  let tabsId = tab.id;
   let tabList = tab.classList;
 
   // запрет на удаление единственной вкладки
   if (sideBar.children.length != 2) {
     sideBar.removeChild(tab);
-    delete tabsStorage[tabsId];
+    delete tabsStorage[tab.id];
   } else {
     console.log("Нельзя удалить единственную вкладку");
     $('.sidebar-pair').removeClass('selected-tab');
   }
 
-  // выбор новой выбранной вкладки, если удаляемая была выбранной :D
+  // выбор новой выбранной вкладки, если удаляемая была выбранной
   let check = false;
   for (let i = 0; i < tabList.length - 1; i++) {
     if (tabList[i] == "active-tab") {
@@ -401,6 +401,13 @@ function createTest(input = '', output = '') {
   innerHtml = `<input type="text" class="input form-control roboto d-flex" placeholder="input" value="${input}" /><input type="text" class="output form-control roboto d-flex" placeholder="output" value="${output}" />`;
   testEl.innerHTML = innerHtml;
 
+  // удаление вкладки при нажатии на Delete
+  testEl.addEventListener("keydown", function(event){
+      if (event.key == "Delete") {
+        testEl.remove();
+      };
+  });
+
   testEl.addEventListener('contextmenu', function(event) {
     event.preventDefault();
 
@@ -427,8 +434,6 @@ function createTest(input = '', output = '') {
     document.getElementById('contextmenu').className = "shown contextmenu";
     document.getElementById('contextmenu').style.top = y + 'px';
     document.getElementById('contextmenu').style.left = x + 'px';
-    
-    return testEl;
   });
 
   testEl.appendChild(result);
@@ -440,7 +445,6 @@ exportButton.addEventListener("click", function(event) {
   let arrowUp = document.getElementById('arrowUp');  
   let deg = rotated? 0 : 180;
 
-  arrowUp.style.webkitTransform = 'rotate('+deg+'deg)'; 
   arrowUp.style.mozTransform    = 'rotate('+deg+'deg)'; 
   arrowUp.style.msTransform     = 'rotate('+deg+'deg)'; 
   arrowUp.style.oTransform      = 'rotate('+deg+'deg)'; 

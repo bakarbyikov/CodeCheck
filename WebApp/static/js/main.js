@@ -239,6 +239,28 @@ document.getElementById("select-solution").addEventListener('contextmenu', funct
   $("#select-solution").click();
 })
 
+class Message {
+  constructor(role, content) {
+    this.role = role;
+    this.content = content;
+  }
+}
+
+function extractMessageFromTag(html) {
+  const classList = html.classList
+  if (!classList.contains('chat'))
+    throw Error("Message should have chat class")
+  let role
+  if (classList.contains('chat-bot'))
+    role = 'assistant'
+  else if (classList.contains('user'))
+    role = 'user'
+  else
+    throw Error("Unknown message sender")
+  const content = html.textContent
+  return new Message(role, content)
+}
+
 //отправление сообщения и получение решения с сервера
 function manageChat() {
   var userMessage = textarea.value.trim();
@@ -278,12 +300,7 @@ function manageChat() {
     contentType: "application/json; charset=utf-8",
     url: "https://olegpepeg.ru/api/chat",
     data: JSON.stringify({
-      "messages" : [
-        {
-          "role" : "user", 
-          "content" : `${userMessage}`
-        }
-      ]
+      "messages": storedInfo.messages.map(extractMessageFromTag)
     }),
     success: function (data) {
       var solution = data.solution;

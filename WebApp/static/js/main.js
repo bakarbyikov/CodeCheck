@@ -294,13 +294,14 @@ function manageChat() {
   }, 1000);
 
   var idOfBotMessage = chatBody.children.length - 1;
+  const messages = storedInfo.messages.map(extractMessageFromTag).slice(1)
 
   $.ajax({
     type: "POST",
     contentType: "application/json; charset=utf-8",
     url: "https://olegpepeg.ru/api/chat",
     data: JSON.stringify({
-      "messages": storedInfo.messages.map(extractMessageFromTag)
+      "messages": messages
     }),
     success: function (data) {
       var solution = data.solution;

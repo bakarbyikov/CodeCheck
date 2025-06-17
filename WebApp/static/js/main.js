@@ -454,7 +454,8 @@ downloadXmlFile.addEventListener('click', function(event) {
 function download() {
   var selectedQuestion = document.getElementsByClassName('chat user')[0].firstChild.textContent;
   var amountOfTests = document.getElementsByClassName('test-box').length;
-  
+  var selectedSolution = document.getElementsByClassName('selected-solution')[0].firstChild.firstChild.firstChild.textContent;
+
   if (nameOfFile.value != '') {
     var filename = nameOfFile.value;
   } else {
@@ -475,19 +476,75 @@ function download() {
     <questiontext format="html">
       <text><![CDATA[<p>${selectedQuestion}</p>]]></text>
     </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <coderunnertype>python3</coderunnertype>
+    <prototypetype>0</prototypetype>
+    <allornothing>1</allornothing>
+    <penaltyregime>10, 20, ...</penaltyregime>
+    <precheck>4</precheck>
+    <hidecheck>0</hidecheck>
+    <showsource>0</showsource>
+    <answerboxlines>18</answerboxlines>
+    <answerboxcolumns>100</answerboxcolumns>
+    <answerpreload></answerpreload>
+    <globalextra></globalextra>
+    <useace></useace>
+    <resultcolumns></resultcolumns>
+    <template></template>
+    <iscombinatortemplate></iscombinatortemplate>
+    <allowmultiplestdins></allowmultiplestdins>
+    <answer></answer>
+    <validateonsave>1</validateonsave>
+    <testsplitterre></testsplitterre>
+    <language></language>
+    <acelang></acelang>
+    <sandbox></sandbox>
+    <grader></grader>
+    <cputimelimitsecs></cputimelimitsecs>
+    <memlimitmb></memlimitmb>
+    <sandboxparams></sandboxparams>
+    <templateparams><![CDATA[${selectedSolution}]]></templateparams>
+    <hoisttemplateparams>1</hoisttemplateparams>
+    <extractcodefromjson>1</extractcodefromjson>
+    <templateparamslang>None</templateparamslang>
+    <templateparamsevalpertry>0</templateparamsevalpertry>
+    <templateparamsevald><![CDATA[{"oleg":"a=int(input())"}]]></templateparamsevald>
+    <twigall>0</twigall>
+    <uiplugin></uiplugin>
+    <uiparameters></uiparameters>
+    <attachments>0</attachments>
+    <attachmentsrequired>0</attachmentsrequired>
+    <maxfilesize>10240</maxfilesize>
+    <filenamesregex></filenamesregex>
+    <filenamesexplain></filenamesexplain>
+    <displayfeedback>2</displayfeedback>
+    <giveupallowed>0</giveupallowed>
+    <prototypeextra></prototypeextra>
     <testcases>`;
 
   // добавление всех вопросов
-  for (let i = 0; i < amountOfTests - 1; i++) {
+  for (let i = 0; i < amountOfTests; i++) {
     let test = document.getElementsByClassName('test-box')[i];
     xml += `
-      <testcase testtype="0" useasexample="0" hiderestiffail="0" mark="1.0000000" >
+      <testcase testtype="0" useasexample="0" hiderestiffail="1" mark="1.0000000" >
         <stdin>
                   <text>${test.children[0].value}</text>
         </stdin>
         <expected>
                   <text>${test.children[1].value}</text>
         </expected>
+        <extra>
+                  <text></text>
+        </extra>
+        <display>
+                  <text>HIDE</text>
+        </display>
       </testcase>`;
   };
 

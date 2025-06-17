@@ -499,7 +499,7 @@ function download() {
     <template></template>
     <iscombinatortemplate></iscombinatortemplate>
     <allowmultiplestdins></allowmultiplestdins>
-    <answer><![CDATA[<p>${selectedSolution}</p>]]></answer>
+    <answer><![CDATA[${selectedSolution}]]></answer>
     <validateonsave>1</validateonsave>
     <testsplitterre></testsplitterre>
     <language></language>

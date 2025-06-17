@@ -477,7 +477,7 @@ function download() {
   if (nameOfFile.value != '') {
     var filename = nameOfFile.value;
   } else {
-    var filename = 'solution.xml';
+    var filename = 'question.xml';
   }
   if (inputCategory.value != '') {
     var nameOfQuestion = inputCategory.value;
@@ -517,7 +517,7 @@ function download() {
     <template></template>
     <iscombinatortemplate></iscombinatortemplate>
     <allowmultiplestdins></allowmultiplestdins>
-    <answer><![CDATA[<p>${selectedSolution}</p>]]></answer>
+    <answer><![CDATA[${selectedSolution}]]></answer>
     <validateonsave>1</validateonsave>
     <testsplitterre></testsplitterre>
     <language></language>

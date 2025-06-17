@@ -459,7 +459,7 @@ function download() {
   if (nameOfFile.value != '') {
     var filename = nameOfFile.value;
   } else {
-    var filename = 'solution.xml';
+    var filename = 'question.xml';
   }
   if (inputCategory.value != '') {
     var nameOfQuestion = inputCategory.value;

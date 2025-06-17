@@ -517,7 +517,7 @@ function download() {
     <template></template>
     <iscombinatortemplate></iscombinatortemplate>
     <allowmultiplestdins></allowmultiplestdins>
-    <answer></answer>
+    <answer><![CDATA[<p>${selectedSolution}</p>]]></answer>
     <validateonsave>1</validateonsave>
     <testsplitterre></testsplitterre>
     <language></language>
@@ -527,12 +527,12 @@ function download() {
     <cputimelimitsecs></cputimelimitsecs>
     <memlimitmb></memlimitmb>
     <sandboxparams></sandboxparams>
-    <templateparams><![CDATA[${selectedSolution}]]></templateparams>
+    <templateparams></templateparams>
     <hoisttemplateparams>1</hoisttemplateparams>
     <extractcodefromjson>1</extractcodefromjson>
     <templateparamslang>None</templateparamslang>
     <templateparamsevalpertry>0</templateparamsevalpertry>
-    <templateparamsevald><![CDATA[{"oleg":"a=int(input())"}]]></templateparamsevald>
+    <templateparamsevald></templateparamsevald>
     <twigall>0</twigall>
     <uiplugin></uiplugin>
     <uiparameters></uiparameters>
